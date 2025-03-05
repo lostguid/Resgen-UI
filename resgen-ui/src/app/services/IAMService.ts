@@ -55,12 +55,20 @@ export class IAMService {
     }
 
     login(): void {
+        console.log(environment);
         this.auth0.isAuthenticated$.subscribe(isAuthenticated => {
             if (isAuthenticated) {
                 // User is authenticated, session is valid              c
             } else {
                 // User is not authenticated, session is invalid              
-                this.auth0.loginWithRedirect();
+                this.auth0.loginWithRedirect().subscribe({
+                    next: () => {
+                        console.log('Login successful');
+                    },
+                    error: (err) => {
+                        console.error('Login failed', err);
+                    }
+                });
             }
         });
     }
