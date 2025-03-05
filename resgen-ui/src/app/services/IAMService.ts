@@ -38,11 +38,7 @@ export class IAMService {
                     }
 
                 } else {
-                    localStorage.removeItem('user.id');
-                    localStorage.removeItem('user.name');
-                    localStorage.removeItem('user.email');
-                    localStorage.removeItem('user.picture');
-                    localStorage.removeItem('user.auth0.token');
+                    this.clearLocalStorageOfUser();
                     console.log('User either logged out or Authentication Failed or Login Session expired.');
                 }
             })
@@ -55,7 +51,7 @@ export class IAMService {
     }
 
     login(): void {
-        console.log(environment);
+        console.log(environment.auth.redirectUri);
         this.auth0.isAuthenticated$.subscribe(isAuthenticated => {
             if (isAuthenticated) {
                 // User is authenticated, session is valid              c
@@ -76,6 +72,15 @@ export class IAMService {
 
     logout(): void {
         // Clear the stored token and any other authentication state
+        this.clearLocalStorageOfUser();
         this.auth0.logout({ logoutParams: { returnTo: environment.auth.logOutUri } })
+    }
+
+    clearLocalStorageOfUser(): void {
+        localStorage.removeItem('user.id');
+        localStorage.removeItem('user.name');
+        localStorage.removeItem('user.email');
+        localStorage.removeItem('user.picture');
+        localStorage.removeItem('user.auth0.token');
     }
 }
