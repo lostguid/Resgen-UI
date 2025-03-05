@@ -1,0 +1,14 @@
+<ng-container>
+  <button (click)="logout()">
+    Log out
+  </button>
+</ng-container>
+
+<ng-container>
+  <button (click)="login()">Log in</button>
+</ng-container>
+
+<div *ngIf="token">
+  <h1>Bearer Token</h1>
+  <p>{{ token }}</p>
+</div>
