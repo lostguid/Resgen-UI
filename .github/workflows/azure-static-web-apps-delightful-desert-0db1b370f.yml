@@ -38,4 +38,4 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_DELIGHTFUL_DESERT_0DB1B370F }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"          
-          output_location: "resgen-ui/dist/"
+          output_location: "./dist/resgen-ui/"
