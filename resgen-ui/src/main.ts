@@ -9,7 +9,7 @@ bootstrapApplication(AppComponent, {
       domain: 'harshith-reddy.us.auth0.com',
       clientId: 'SZyi2Y3UDCmUvP3iYZ2xtrP8MFIJr1xo',
       authorizationParams: {
-        redirect_uri: 'https://localhost:4200'
+        redirect_uri: 'http://localhost:4200/success'
       }
     }),
   ]
