@@ -13,7 +13,8 @@ bootstrapApplication(AppComponent, {
       domain: environment.auth.domain,
       clientId: environment.auth.clientId,
       authorizationParams: {
-        redirect_uri: environment.auth.redirectUri
+        redirect_uri: environment.auth.redirectUri,
+        audience: environment.auth.audience
       }
     }),
     importProvidersFrom(CommonModule),
