@@ -22,7 +22,7 @@ jobs:
         working-directory: resgen-ui
       
       - name: Build Angular application
-        run: npm run build prod
+        run: npm run build-prod
         working-directory: resgen-ui
       
       - name: Upload build artifacts
