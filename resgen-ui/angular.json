@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "resgen": {
+    "resgen-ui": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/resgen",
+            "outputPath": "dist/resgen-ui",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -29,12 +29,7 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": [],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -64,10 +59,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "resgen:build:production"
+              "buildTarget": "resgen-ui:build:production"
             },
             "development": {
-              "buildTarget": "resgen:build:development"
+              "buildTarget": "resgen-ui:build:development"
             }
           },
           "defaultConfiguration": "development"
