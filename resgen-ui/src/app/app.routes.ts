@@ -5,5 +5,5 @@ import { AuthGuard } from '@auth0/auth0-angular';
 export const routes: Routes = [  
     { path: 'home', component: HomeComponent },
     //{ path: 'login', component: LoginComponent, canActivate: [AuthGuard] },
-    { path: '', redirectTo: '/home', pathMatch: 'full' }
+    //{ path: '', redirectTo: '/home', pathMatch: 'full' }
 ];
