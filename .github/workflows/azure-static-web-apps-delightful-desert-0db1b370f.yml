@@ -19,16 +19,18 @@ jobs:
       
       - name: Install dependencies
         run: npm install
+        working-directory: resgen-ui
       
       - name: Build Angular application
         run: npm run build --production
+        working-directory: resgen-ui
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build
           path: |
-            dist/**
+            resgen-ui/dist/**
 
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
@@ -36,5 +38,5 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_DELIGHTFUL_DESERT_0DB1B370F }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "./resgen-ui"
+          app_location: "resgen-ui/"
           output_location: "dist/resgen-ui"
