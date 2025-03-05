@@ -1,5 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import { ResgenAuthService } from '../../services/ResgenAuthService';
+import { IAMService } from '../../services/IAMService';
 import { CommonModule, DOCUMENT } from '@angular/common';
 
 @Component({
@@ -13,29 +13,21 @@ export class HomeComponent {
   token: string | null = null;
   isLoggedIn: boolean = false;
 
-  constructor(public authService: ResgenAuthService) {
+  constructor(public authService: IAMService) {
 
 
   }
 
   ngOnInit(): void {
-    this.authService.getAccessToken().subscribe(token => {
-      this.token = token;
-      console.log('Bearer Token:', token);
-    });
-    
-
-    //this.isLoggedIn = this.authService.isLoggedIn();
+    this.token = this.authService.getAccessToken();
   }
 
   login() {
-    this.authService.login();
-    this.isLoggedIn = true;
+    this.authService.login();    
   }
 
   logout() {    
-    this.authService.logout();
-    this.isLoggedIn = false;
+    this.authService.logout();    
   }
 
 }
