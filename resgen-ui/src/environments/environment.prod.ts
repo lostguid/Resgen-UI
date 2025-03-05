@@ -3,10 +3,10 @@ export const environment = {
   apiUrl: 'https://staging.example.com/api',
   auth: {
     domain: 'resgen-ai.us.auth0.com',
-    clientId: 'rsY5nSoucGcdP2wPKOSA45KquQIEEY6T',
+    clientId: 'vcxOOz5DWFxImTeN2ToQZPojV8YUBqK9',
     audience: 'https://staging.example.com/api',
-    redirectUri: 'http://localhost:4200/home',
-    logOutUri: 'http://localhost:4200/home',
+    redirectUri: 'https://delightful-desert-0db1b370f.6.azurestaticapps.net/home',
+    logOutUri: 'https://delightful-desert-0db1b370f.6.azurestaticapps.net/home',
     scope: 'openid profile email'
   }
 };
