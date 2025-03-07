@@ -9,7 +9,7 @@ import { IAMService } from '../../services/IAMService';
 export class NavbarComponent {
   userImageUrl: string | null = localStorage.getItem('user.picture'); // Initialize the string property
 
-  constructor(private auth: IAMService, private auth0: IAMService) {
+  constructor(private auth: IAMService) {
   }
 
 
