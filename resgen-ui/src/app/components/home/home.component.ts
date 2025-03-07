@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { IAMService } from '../../services/IAMService';
 import { CommonModule, DOCUMENT } from '@angular/common';
+import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
   selector: 'app-home',

@@ -50,23 +50,8 @@ export class IAMService {
         return localStorage.getItem('user.auth0.token') || '';
     }
 
-    login(): void {
-        console.log(environment.auth.redirectUri);
-        this.auth0.isAuthenticated$.subscribe(isAuthenticated => {
-            if (isAuthenticated) {
-                // User is authenticated, session is valid              c
-            } else {
-                // User is not authenticated, session is invalid              
-                this.auth0.loginWithRedirect().subscribe({
-                    next: () => {
-                        console.log('Login successful');
-                    },
-                    error: (err) => {
-                        console.error('Login failed', err);
-                    }
-                });
-            }
-        });
+    login(): void {        
+        this.auth0.loginWithRedirect();
     }
 
 
