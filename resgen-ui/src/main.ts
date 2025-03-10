@@ -6,9 +6,13 @@ import { importProvidersFrom } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { routes } from './app/app.routes';
 import { environment } from './environments/environment';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authHttpInterceptorFn } from '@auth0/auth0-angular';
+import { Auth0HttpInerceptorFnService } from './app/services/auth0-http-inerceptor-fn.service';
 
 bootstrapApplication(AppComponent, {
   providers: [
+    provideHttpClient(withInterceptors([Auth0HttpInerceptorFnService])),
     provideAuth0({
       domain: environment.auth.domain,
       clientId: environment.auth.clientId,
@@ -17,7 +21,7 @@ bootstrapApplication(AppComponent, {
         audience: environment.auth.audience
       }
     }),
-    importProvidersFrom(CommonModule),
+    importProvidersFrom(CommonModule),    
     provideRouter(routes)
   ]
 })

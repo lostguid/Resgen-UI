@@ -1,11 +1,9 @@
 import { Component } from '@angular/core';
-import { NavbarComponent } from '../navbar/navbar.component';
 import { IAMService } from '../../services/IAMService';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-welcome',
-  imports: [NavbarComponent, CommonModule],
+  imports: [],
   templateUrl: './welcome.component.html',
   styleUrl: './welcome.component.css'
 })
