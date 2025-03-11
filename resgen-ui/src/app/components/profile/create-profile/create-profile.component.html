@@ -1,0 +1,74 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-12">
+    <div class="grid gap-6 mb-6 md:grid-cols-6">
+        <div class="md:col-span-6">
+            <label for="profileName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Profile Name</label>
+            <input formControlName="profileName" type="text" id="profileName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Profile Name" required />
+            <div *ngIf="form.get('profileName')?.touched && form.get('profileName')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('profileName') }}</div>
+        </div>
+        <div>
+            <label for="firstName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">First name</label>
+            <input formControlName="firstName" type="text" id="firstName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required />
+            <div *ngIf="form.get('firstName')?.touched && form.get('firstName')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('firstName') }}</div>
+        </div>
+        <div>
+            <label for="lastName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Last name</label>
+            <input formControlName="lastName" type="text" id="lastName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Doe" required />
+            <div *ngIf="form.get('lastName')?.touched && form.get('lastName')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('lastName') }}</div>
+        </div>
+    
+        <div>
+            <label for="phone" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Phone number</label>
+            <input formControlName="phone" type="tel" id="phone" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="123-45-678" required />
+            <div *ngIf="form.get('phone')?.touched && form.get('phone')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('phone') }}</div>
+        </div>
+        <div>
+            <label for="linkedin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">LinkedIn URL</label>
+            <input formControlName="linkedin" type="url" id="linkedin" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="https://www.linkedin.com/in/johndoe/" required />
+            <div *ngIf="form.get('linkedin')?.touched && form.get('linkedin')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('linkedin') }}</div>
+        </div>
+        <div>
+            <label for="school" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">School Name</label>
+            <input formControlName="school" type="text" id="school" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="University of Cincinnati" required />
+            <div *ngIf="form.get('school')?.touched && form.get('school')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('school') }}</div>
+        </div>
+        <div>
+            <label for="loe" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Level of Education</label>
+            <input formControlName="loe" type="text" id="loe" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Masters in Information Systems" required />
+            <div *ngIf="form.get('loe')?.touched && form.get('loe')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('loe') }}</div>
+        </div>
+    </div>
+    <div formArrayName="experiences" class="grid gap-6 mb-6 md:grid-cols-2">
+        <div *ngFor="let experience of experiences.controls; let i=index" [formGroupName]="i" class="border p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+            <div class="grid gap-6 mb-6 md:grid-cols-4">
+                <div>
+                    <label [for]="'companyName' + i" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Company Name</label>
+                    <input [formControlName]="'companyName'" [id]="'companyName' + i" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+                    <div *ngIf="experience.get('companyName')?.touched && experience.get('companyName')?.invalid" class="text-red-500 text-sm">{{ getExperienceErrorMessage(i, 'companyName') }}</div>
+                </div>
+                <div>
+                    <label [for]="'title' + i" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>
+                    <input [formControlName]="'title'" [id]="'title' + i" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+                    <div *ngIf="experience.get('title')?.touched && experience.get('title')?.invalid" class="text-red-500 text-sm">{{ getExperienceErrorMessage(i, 'title') }}</div>
+                </div>
+                <div>
+                    <label [for]="'startDate' + i" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start Date</label>
+                    <input [formControlName]="'startDate'" [id]="'startDate' + i" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+                    <div *ngIf="experience.get('startDate')?.touched && experience.get('startDate')?.invalid" class="text-red-500 text-sm">{{ getExperienceErrorMessage(i, 'startDate') }}</div>
+                </div>
+                <div>
+                    <label [for]="'endDate' + i" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End Date</label>
+                    <input [formControlName]="'endDate'" [id]="'endDate' + i" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+                    <div *ngIf="experience.get('endDate')?.touched && experience.get('endDate')?.invalid" class="text-red-500 text-sm">{{ getExperienceErrorMessage(i, 'endDate') }}</div>
+                </div>
+            </div>
+            <div class="mb-6">
+                <label [for]="'skillsUsed' + i" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Skills Used</label>
+                <textarea [formControlName]="'skillsUsed'" [id]="'skillsUsed' + i" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" rows="3" required></textarea>
+                <div *ngIf="experience.get('skillsUsed')?.touched && experience.get('skillsUsed')?.invalid" class="text-red-500 text-sm">{{ getExperienceErrorMessage(i, 'skillsUsed') }}</div>
+            </div>
+            <button type="button" (click)="removeExperience(i)" class="text-red-500 hover:text-red-700 focus:outline-none">Remove</button>
+        </div>
+    </div>
+    <button type="button" (click)="addExperience()" class="text-white bg-green-500 hover:bg-green-600 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-green-400 dark:hover:bg-green-500 dark:focus:ring-green-600 mb-6">Add Experience</button>
+    <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+</form>
