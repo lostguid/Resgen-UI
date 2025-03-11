@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
-  imports: [CommonModule, ReactiveFormsModule, CreateProfileComponent],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -30,7 +30,7 @@ export class ProfileComponent {
   }
 
   startEdit(profile: any) {
-    this.router.navigate(['/profile/edit']);
+    this.router.navigate(['/profiles/edit']);
   }
 
   deleteProfile(id: number) {
@@ -40,7 +40,7 @@ export class ProfileComponent {
   addProfile() {
     // const newId = this.profiles.length ? Math.max(...this.profiles.map(p => p.id)) + 1 : 1;
     // this.profiles.push({ id: newId, name: 'New Profile' });
-    this.router.navigate(['/profile/create']);
+    this.router.navigate(['/profiles/create']);
   }
 
   viewProfile(profile: any) {

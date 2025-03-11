@@ -26,7 +26,7 @@ export class IAMService {
                     }
                     if (localStorage.getItem('user.id') === null || localStorage.getItem('user.id') === '') {
                         this.auth0.user$.subscribe(user => {
-                            debugger;
+                            //debugger;
                             if (user?.sub?.includes('google-oauth2')) { //For Google logged IN USERS
                                 //localStorage.setItem('userAttributes', JSON.stringify(user));
                                 localStorage.setItem('user.id', user?.sub || '');
