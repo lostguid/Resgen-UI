@@ -31,7 +31,7 @@
               "src/styles.css"
             ],
             "scripts": [
-              "node_modules/preline/preline.js"
+              
             ]
           },
           "configurations": {
@@ -98,7 +98,7 @@
               "src/styles.css"
             ],
             "scripts": [
-              "node_modules/preline/preline.js"
+              
             ]
           }
         }

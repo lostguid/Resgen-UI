@@ -1,0 +1,45 @@
+<div class="container mx-auto p-6">
+    <div class="grid grid-cols-3 gap-4 mb-4 mt-10">
+        <div class="flex items-center justify-center h-180 rounded-sm bg-gray-50 dark:bg-gray-800">
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                <div class="grid gap-6 mb-6 md:grid-cols-2">
+                    <div>
+                        <label for="firstName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">First name</label>
+                        <input formControlName="firstName" type="text" id="firstName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required />
+                    </div>
+                    <div>
+                        <label for="lastName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Last name</label>
+                        <input formControlName="lastName" type="text" id="lastName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Doe" required />
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label for="phone" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Phone number</label>
+                    <input formControlName="phone" type="tel" id="phone" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="123-45-678" required />
+                </div>
+                <div class="mb-6">
+                    <label for="linkedin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">LinkedIn URL</label>
+                    <input formControlName="linkedin" type="url" id="linkedin" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="https://www.linkedin.com/in/johndoe/" required />
+                </div>
+                <div class="mb-6">
+                    <label for="school" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">School Name</label>
+                    <input formControlName="school" type="text" id="school" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="University of Cincinnati" required />
+                </div>
+                <div class="mb-6">
+                    <label for="loe" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Level of Education</label>
+                    <input formControlName="loe" type="text" id="loe" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Masters in Information Systems" required />
+                </div>
+                <div id="email-container" formArrayName="emails" class="mb-6">
+                    <div *ngFor="let email of emails.controls; let i=index">
+                        <label [for]="'email' + i" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email address</label>
+                        <div class="flex">
+                            <input [formControlName]="i" type="email" [id]="'email' + i" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="john.doe@company.com" required />
+                            <button type="button" (click)="removeEmail(i)" class="ml-2 text-red-500 hover:text-red-700 focus:outline-none">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" (click)="addEmail()" class="text-white bg-green-500 hover:bg-green-600 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-green-400 dark:hover:bg-green-500 dark:focus:ring-green-600 mb-6">+</button>
+                <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
