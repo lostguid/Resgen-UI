@@ -1,6 +1,6 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://api-resgen-enfjdbamcyedehf3.eastus2-01.azurewebsites.net/api',
+    apiUrl: 'http://localhost:5039/api',
     auth: {
       domain: 'resgen-ai.us.auth0.com',
       clientId: 'rsY5nSoucGcdP2wPKOSA45KquQIEEY6T',
