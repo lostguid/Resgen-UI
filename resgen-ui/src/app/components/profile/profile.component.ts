@@ -1,54 +1,78 @@
-import { Component } from '@angular/core';
-import { Flowbite } from '../../../flowbite-decorator';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { CreateProfileComponent } from './create-profile/create-profile.component';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { CommonModule } from '@angular/common';
+import { ModalComponent } from '../modal/modal.component';
 
 @Component({
   selector: 'app-profile',
-  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './profile.component.html',
-  styleUrl: './profile.component.css'
+  styleUrls: ['./profile.component.css'],
+  imports: [CommonModule, ReactiveFormsModule, ModalComponent],
 })
-@Flowbite()
-export class ProfileComponent {
-  profiles: any[] = [
-    { id: 1, name: 'John Doe' },
-    { id: 2, name: 'Jane Smith' },
-    { id: 3, name: 'Michael Johnson' }
-  ];
-
+export class ProfileComponent implements OnInit {
+  profiles: any = [];
   editForm: FormGroup;
-  currentProfileId: number | null = null;
-  currentProfile: any | null = null;
+  showModal = false;
+  showDeleteModal = false;
+  modalTitle = '';
+  modalMessage = '';
+  modalClass = '';
+  modalIcon = '';
 
-  constructor(private fb: FormBuilder, public router: Router) {
+  constructor(private fb: FormBuilder, public router: Router, private http: HttpClient) {
     this.editForm = this.fb.group({
       name: ['', Validators.required]
     });
   }
 
+  ngOnInit() {
+    this.loadProfiles();
+  }
+
+  loadProfiles() {
+    this.http.get<any[]>(`${environment.apiUrl}/profile/user/` + localStorage.getItem('user.id')).subscribe(data => {
+      this.profiles = data;
+    });
+  }
+
   startEdit(profile: any) {
-    this.router.navigate(['/profiles/edit']);
+    this.router.navigate(['/profiles/edit/', profile.id]);
   }
 
   deleteProfile(id: number) {
-    this.profiles = this.profiles.filter(profile => profile.id !== id);
+    const confirmed = confirm('Are you sure you want to delete this profile?');
+    if (confirmed) {
+      this.http.delete(`${environment.apiUrl}/profile/${id}`).subscribe(
+        response => {
+          this.profiles = this.profiles.filter((profile: any) => profile.id !== id);
+          this.showModal = true;
+          this.modalTitle = 'Success';
+          this.modalMessage = 'Profile deleted successfully';
+          // this.modalClass = 'bg-green-500';
+          // this.modalIcon = 'M5 13l4 4L19 7';
+        },
+        error => {
+          this.showModal = true;
+          this.modalTitle = 'Error';
+          this.modalMessage = 'Error deleting profile';
+          // this.modalClass = 'bg-red-500';
+          // this.modalIcon = 'M6 18L18 6M6 6l12 12';
+        }
+
+      );
+    }
   }
 
   addProfile() {
-    // const newId = this.profiles.length ? Math.max(...this.profiles.map(p => p.id)) + 1 : 1;
-    // this.profiles.push({ id: newId, name: 'New Profile' });
     this.router.navigate(['/profiles/create']);
   }
 
-  viewProfile(profile: any) {
-    this.currentProfile = profile;
-  }
-
-  closeModal() {
-    this.currentProfile = null;
+  onModalClose() {
+    this.showModal = false;
+    this.router.navigate(['/profiles']);
   }
 
 }

@@ -1,49 +1,49 @@
 <div class="container mx-auto mt-10 p-4">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Create Profile</h1>
+        <h1 class="text-2xl font-bold">Edit Profile</h1>
         <button (click)="goBack()" class="text-white bg-gray-500 hover:bg-gray-700 rounded px-4 py-2 text-xs">Back to Profiles</button>
     </div>
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-12">
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="mt-12">
         <div class="grid gap-6 mb-6 md:grid-cols-6">
             <div class="md:col-span-6">
                 <label for="profileName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Profile Name</label>
                 <input formControlName="profileName" type="text" id="profileName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Profile Name" required />
-                <div *ngIf="form.get('profileName')?.touched && form.get('profileName')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('profileName') }}</div>
+                <div *ngIf="editForm.get('profileName')?.touched && editForm.get('profileName')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('profileName') }}</div>
             </div>
             <div>
                 <label for="firstName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">First name</label>
                 <input formControlName="firstName" type="text" id="firstName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required />
-                <div *ngIf="form.get('firstName')?.touched && form.get('firstName')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('firstName') }}</div>
+                <div *ngIf="editForm.get('firstName')?.touched && editForm.get('firstName')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('firstName') }}</div>
             </div>
             <div>
                 <label for="lastName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Last name</label>
                 <input formControlName="lastName" type="text" id="lastName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Doe" required />
-                <div *ngIf="form.get('lastName')?.touched && form.get('lastName')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('lastName') }}</div>
+                <div *ngIf="editForm.get('lastName')?.touched && editForm.get('lastName')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('lastName') }}</div>
             </div>
             <div>
                 <label for="phone" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Phone number</label>
                 <input formControlName="phone" type="tel" id="phone" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="123-45-678" required />
-                <div *ngIf="form.get('phone')?.touched && form.get('phone')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('phone') }}</div>
+                <div *ngIf="editForm.get('phone')?.touched && editForm.get('phone')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('phone') }}</div>
             </div>
             <div>
                 <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
                 <input formControlName="email" type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="john.doe@example.com" required />
-                <div *ngIf="form.get('email')?.touched && form.get('email')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('email') }}</div>
+                <div *ngIf="editForm.get('email')?.touched && editForm.get('email')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('email') }}</div>
             </div>
             <div>
                 <label for="linkedin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">LinkedIn URL</label>
                 <input formControlName="linkedin" type="url" id="linkedin" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="https://www.linkedin.com/in/johndoe/" required />
-                <div *ngIf="form.get('linkedin')?.touched && form.get('linkedin')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('linkedin') }}</div>
+                <div *ngIf="editForm.get('linkedin')?.touched && editForm.get('linkedin')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('linkedin') }}</div>
             </div>
             <div>
                 <label for="school" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">School Name</label>
                 <input formControlName="school" type="text" id="school" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="University of Cincinnati" required />
-                <div *ngIf="form.get('school')?.touched && form.get('school')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('school') }}</div>
+                <div *ngIf="editForm.get('school')?.touched && editForm.get('school')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('school') }}</div>
             </div>
             <div>
                 <label for="loe" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Level of Education</label>
                 <input formControlName="loe" type="text" id="loe" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Masters in Information Systems" required />
-                <div *ngIf="form.get('loe')?.touched && form.get('loe')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('loe') }}</div>
+                <div *ngIf="editForm.get('loe')?.touched && editForm.get('loe')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('loe') }}</div>
             </div>
         </div>
         <div formArrayName="experiences" class="grid gap-6 mb-6 md:grid-cols-2">
@@ -79,40 +79,8 @@
             </div>
         </div>
         <button type="button" (click)="addExperience()" class="text-white bg-green-500 hover:bg-green-600 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs w-full sm:w-auto px-5 py-2.5 text-center dark:bg-green-400 dark:hover:bg-green-500 dark:focus:ring-green-600 mb-6 mr-2">Add Experience</button>
-        <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xs w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+        <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xs w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Update</button>
     </form>
 </div>
 
-<div *ngIf="showModal" class="fixed z-10 inset-0 overflow-y-auto">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-      </div>
-      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-          <div class="sm:flex sm:items-start">
-            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full {{ modalClass }}" aria-hidden="true">
-              <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="modalIcon" />
-              </svg>
-            </div>
-            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-              <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                {{ modalTitle }}
-              </h3>
-              <div class="mt-2">
-                <p class="text-sm text-gray-500">
-                  {{ modalMessage }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-          <button type="button" (click)="closeModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
+<app-modal *ngIf="showModal" [title]="modalTitle" [message]="modalMessage" (close)="onModalClose()"></app-modal>

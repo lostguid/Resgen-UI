@@ -34,8 +34,7 @@ export class AppComponent implements OnInit {
     //   initFlowbite();
     // });
     this.auth0.isAuthenticated$.subscribe(
-      (isAuthenticated) => {
-        debugger;
+      (isAuthenticated) => {        
         this.isAuthenticated = isAuthenticated;
         if(this.isAuthenticated == true){
           

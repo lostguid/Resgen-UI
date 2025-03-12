@@ -1,29 +1,37 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Flowbite } from '../../../../flowbite-decorator';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { Datepicker } from 'flowbite-datepicker';
+import { CommonModule } from '@angular/common';
+import { Flowbite } from '../../../../flowbite-decorator';
+import { first } from 'rxjs';
+import { ModalComponent } from '../../modal/modal.component';
 
 @Component({
-  selector: 'app-create-profile',
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './create-profile.component.html',
-  styleUrls: ['./create-profile.component.css']
+  selector: 'app-edit-profile',
+  templateUrl: './edit-profile.component.html',
+  styleUrls: ['./edit-profile.component.css'],
+  imports: [CommonModule, ReactiveFormsModule, ModalComponent]
 })
-@Flowbite()
-export class CreateProfileComponent implements AfterViewInit {
-  form: FormGroup;
-  showModal = false;
-  modalTitle = '';
-  modalMessage = '';
-  modalClass = '';
-  modalIcon = '';
 
-  constructor(private fb: FormBuilder, private router: Router, private http: HttpClient) {
-    this.form = this.fb.group({
+@Flowbite()
+export class EditProfileComponent implements OnInit {
+  editForm: FormGroup;
+  profileId: string;
+
+  showModal: boolean = false;
+  modalTitle: string = '';
+  modalMessage: string = '';
+
+  constructor(
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router,
+    private http: HttpClient
+  ) {
+    this.editForm = this.fb.group({
       profileName: ['', Validators.required],
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
@@ -34,9 +42,43 @@ export class CreateProfileComponent implements AfterViewInit {
       loe: ['', Validators.required],
       experiences: this.fb.array([])
     });
+    this.profileId = this.route.snapshot.paramMap.get('id') || '';
+  }
+
+  ngOnInit() {
+    this.loadProfile();
   }
 
   ngAfterViewInit() {
+    this.initializeDatepickers();
+  }
+
+  loadProfile() {
+    this.http.get<any>(`${environment.apiUrl}/profile/${this.profileId}`).subscribe(data => {
+      this.editForm.patchValue({
+        profileName: data.profile_name,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        phone: data.phone,
+        email: data.email,
+        linkedin: data.linkedin_url,
+        school: data.school_name,
+        loe: data.level_of_education
+      });
+      this.setExperiences(data.experiences);
+    });
+  }
+
+  setExperiences(experiences: any[]) {
+    const experienceFormGroups = experiences.map(exp => this.fb.group({
+      companyName: [exp.company_name, Validators.required],
+      title: [exp.title, Validators.required],
+      startDate: [exp.start_date_in_utc, Validators.required],
+      endDate: [exp.end_date_in_utc, Validators.required],
+      skillsUsed: [exp.skills_used.join(', '), Validators.required]
+    }));
+    const experienceFormArray = this.fb.array(experienceFormGroups);
+    this.editForm.setControl('experiences', experienceFormArray);
     this.initializeDatepickers();
   }
 
@@ -48,11 +90,10 @@ export class CreateProfileComponent implements AfterViewInit {
       });
       el.addEventListener('changeDate', (event: any) => {
         const input = event.target as HTMLInputElement;
-        debugger;
-        const formControlName = input.getAttribute('id');        
+        const formControlName = input.getAttribute('id');
         if (formControlName) {
           const splitString = formControlName.replace(/(\d+)$/, '.$1').replace(/(.*)\.(\d+)/, '$2.$1');
-          const control = this.form.get('experiences.'+splitString);
+          const control = this.editForm.get('experiences.'+splitString);          
           if (control) {
             control.setValue(input.value);
             control.markAsDirty();
@@ -63,22 +104,18 @@ export class CreateProfileComponent implements AfterViewInit {
     });
   }
 
-  createExperienceFormGroup(): FormGroup {
-    return this.fb.group({
+  get experiences() {
+    return this.editForm.get('experiences') as FormArray;
+  }
+
+  addExperience() {
+    this.experiences.push(this.fb.group({
       companyName: ['', Validators.required],
       title: ['', Validators.required],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
       skillsUsed: ['', Validators.required]
-    });
-  }
-
-  get experiences() {
-    return this.form.get('experiences') as FormArray;
-  }
-
-  addExperience() {
-    this.experiences.push(this.createExperienceFormGroup());
+    }));
     setTimeout(() => this.initializeDatepickers(), 0); // Reinitialize datepickers for new elements
   }
 
@@ -87,7 +124,7 @@ export class CreateProfileComponent implements AfterViewInit {
   }
 
   getErrorMessage(controlName: string): string {
-    const control = this.form.get(controlName);
+    const control = this.editForm.get(controlName);
     if (control?.hasError('required')) {
       return 'Field cannot be empty';
     }
@@ -110,16 +147,16 @@ export class CreateProfileComponent implements AfterViewInit {
   }
 
   onSubmit() {
-    if (this.form.valid) {
-      const formValue = this.form.value;
+    if (this.editForm.valid) {
+      const formValue = this.editForm.value;
       const formattedData = {
-        id: '3', // You can generate or assign an ID as needed
-        name: `${formValue.firstName} ${formValue.lastName}`,
+        id: this.profileId,
         profile_name: formValue.profileName,
-        user_id: localStorage.getItem('user.id'), // You can generate or assign a user ID as needed
-        created_at_in_utc: new Date().toISOString(), // Current timestamp
+        name: formValue.firstName + ' ' + formValue.lastName,
         first_name: formValue.firstName,
         last_name: formValue.lastName,
+        user_id: localStorage.getItem('user.id'),
+        created_at_in_utc: new Date().toISOString(), // Current timestamp
         email: formValue.email,
         phone: formValue.phone,
         linkedin_url: formValue.linkedin,
@@ -134,29 +171,25 @@ export class CreateProfileComponent implements AfterViewInit {
         }))
       };
 
-      this.http.post(`${environment.apiUrl}/profile`, formattedData).subscribe(
+      this.http.put(`${environment.apiUrl}/profile/${this.profileId}`, formattedData).subscribe(
         response => {
-          this.showModal = true;
           this.modalTitle = 'Success';
-          this.modalMessage = 'Profile created successfully';
-          this.modalClass = 'bg-green-500';
-          this.modalIcon = 'M5 13l4 4L19 7';
+          this.modalMessage = 'Profile updated successfully!';
+          this.showModal = true;
         },
         error => {
-          this.showModal = true;
           this.modalTitle = 'Error';
-          this.modalMessage = 'Error creating profile';
-          this.modalClass = 'bg-red-500';
-          this.modalIcon = 'M6 18L18 6M6 6l12 12';
+          this.modalMessage = 'Failed to update profile. Please try again.';
+          this.showModal = true;
         }
       );
     } else {
-      this.form.markAllAsTouched();
+      this.editForm.markAllAsTouched();
       console.log('Form is invalid');
     }
   }
 
-  closeModal() {
+  onModalClose() {
     this.showModal = false;
     this.router.navigate(['/profiles']);
   }

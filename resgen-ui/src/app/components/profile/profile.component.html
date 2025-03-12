@@ -1,29 +1,27 @@
 <div class="container mx-auto mt-10 p-4">
-    <h1 class="text-2xl font-bold mb-4">Profile List</h1>
-    <ul class="space-y-4">
-      <li *ngFor="let profile of profiles" class="p-4 bg-white rounded shadow">
-        <div class="flex justify-between items-center">
-          <span>{{ profile.name }}</span>
-          <div class="space-x-2">
-            <button (click)="viewProfile(profile)" class="text-blue-500 hover:text-blue-700">View</button>
-            <button (click)="startEdit(profile)" class="text-blue-500 hover:text-blue-700">Edit</button>
-            <button (click)="deleteProfile(profile.id)" class="text-red-500 hover:text-red-700">Delete</button>
-          </div>
-        </div>
-      </li>
-    </ul>    
-    <div class="mt-4">
-      <button (click)="addProfile()" class="px-4 py-2 bg-green-500 text-white rounded">Add New Profile</button>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Profile List</h1>
+        <button (click)="addProfile()" class="text-white bg-green-500 hover:bg-green-700 text-xs rounded px-4 py-2">Add New Profile</button>
     </div>
-  
-    <!-- View Profile Modal -->
-    <div *ngIf="currentProfile" id="viewProfileModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-      <div class="bg-white rounded-lg shadow-lg p-4">
-        <h2 class="text-xl font-bold mb-2">Profile Details</h2>
-        <p><strong>Name:</strong> {{ currentProfile.name }}</p>
-        <div class="mt-4">
-          <button (click)="closeModal()" class="px-4 py-2 bg-blue-500 text-white rounded">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
+    <table class="min-w-full bg-white border border-gray-300">
+        <thead>
+            <tr class="bg-gray-100">
+                <th class="py-2 px-4 border-b border-gray-300 text-left">Name</th>
+                <th class="py-2 px-4 border-b border-gray-300 text-left">Created Timestamp</th>
+                <th class="py-2 px-4 border-b border-gray-300 text-left">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let profile of profiles" class="border-b border-gray-300">
+                <td class="py-2 px-4 border-b border-gray-300">{{ profile.profile_name }}</td>
+                <td class="py-2 px-4 border-b border-gray-300">{{ profile.created_at_in_utc | date:'short' }}</td>
+                <td class="py-2 px-4 border-b border-gray-300">
+                    <button (click)="startEdit(profile)" class="text-white bg-blue-500 hover:bg-blue-700 rounded text-xs px-2 py-1 mr-2 cursor-pointer">Edit</button>
+                    <button (click)="deleteProfile(profile.id)" class="text-white bg-red-500 hover:bg-red-700 rounded text-xs px-2 py-1 cursor-pointer">Delete</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<app-modal *ngIf="showModal" [title]="modalTitle" [message]="modalMessage" (close)="onModalClose()"></app-modal>
