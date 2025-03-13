@@ -1,7 +1,7 @@
 <div class="relative">
   <div class="container mx-auto p-4 mt-10 flex flex-col md:flex-row" [class.opacity-50]="isLoading">
     <!-- First Column -->
-    <div class="w-full md:w-1/3 p-2">
+    <div class="w-full md:w-1/2 p-4 overflow-auto bg-white h-1/2 md:h-full">
       <div class="mb-4">
         <label for="profileDropdown" class="block text-sm font-medium text-gray-700">Select Profile</label>
         <select id="profileDropdown" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
@@ -19,20 +19,20 @@
       </button>
     </div>
     <!-- Second Column -->
-    <div class="w-full md:w-2/3 p-2">
+    <div class="w-full md:w-1/2 p-4 h-1/2 md:h-full">
       <pdf-viewer [src]="selectedResumeUrl" [rotation]="0"
       [original-size]="false"
       [show-all]="true"
       [fit-to-page]="false"
-      [zoom]="1.6"
+      [zoom]="1"
       [zoom-scale]="'page-height'"
       [stick-to-page]="false"
       [render-text]="true"
       [external-link-target]="'blank'"
       [autoresize]="true"
       [show-borders]="true"
-      style="width: 100%; height: 70vh;"></pdf-viewer>
-      <div class="mt-10 flex justify-center space-x-2">
+      style="width: 100%; height: 75vh;"></pdf-viewer>
+      <div class="mt-2 flex justify-center space-x-2">
         <button *ngIf="!showSaveTextbox" id="saveButton" (click)="toggleSaveTextbox()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
           Save
         </button>
