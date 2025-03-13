@@ -10,6 +10,7 @@ import { FlowbiteService } from './services/FlowBite.service';
 import { AuthService } from '@auth0/auth0-angular';
 import { Flowbite } from '../flowbite-decorator';
 import { delay, of, switchMap } from 'rxjs';
+import { TabService } from './services/tab.service';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +28,10 @@ export class AppComponent implements OnInit {
   user: any = {};
 
 
-  constructor(private eRef: ElementRef,private router: Router, public auth: IAMService, private http: HttpClient, private flowbiteService: FlowbiteService, private auth0: AuthService) {   
+  constructor(private eRef: ElementRef, private router: Router, public auth: IAMService, private http: HttpClient, private flowbiteService: FlowbiteService, private auth0: AuthService, private tabService: TabService) {
+    this.tabService.selectedTab$.subscribe(tab => {
+      this.selectedTab = tab;
+    });
   }
 
   @HostListener('document:click', ['$event'])
@@ -43,22 +47,22 @@ export class AppComponent implements OnInit {
     //   initFlowbite();
     // });
     this.auth0.isAuthenticated$.subscribe(
-      (isAuthenticated) => {        
+      (isAuthenticated) => {
         this.isAuthenticated = isAuthenticated;
-        if(this.isAuthenticated == true){
-          
+        if (this.isAuthenticated == true) {
+
           of(null).pipe(
             delay(1),
-            switchMap(() => this.http.get<any>(environment.apiUrl+`/User/userId/` + localStorage.getItem('user.id')))
+            switchMap(() => this.http.get<any>(environment.apiUrl + `/User/userId/` + localStorage.getItem('user.id')))
           ).subscribe(response => {
             this.user = response;
             this.userImageUrl = localStorage.getItem('user.picture');
           });
-        }        
+        }
       });
   }
 
-  login(){
+  login() {
     this.auth.login();
   }
 

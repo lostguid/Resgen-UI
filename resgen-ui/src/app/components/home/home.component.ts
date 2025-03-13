@@ -6,6 +6,7 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { environment } from '../../../environments/environment';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { TabService } from '../../services/tab.service';
 
 @Component({
   selector: 'app-home',
@@ -28,7 +29,7 @@ export class HomeComponent implements AfterViewInit {
   fileName: string = '';
   //selectedResumeUrl: string = 'https://storageresgen.blob.core.windows.net/resgen-assets/resume_example2.pdf';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private tabService: TabService) {}
 
   ngOnInit(): void {
     this.loadProfiles();
@@ -134,6 +135,7 @@ export class HomeComponent implements AfterViewInit {
               this.isLoading = false;
               //('Resume saved successfully!');
               this.showSaveTextbox = false;
+              this.tabService.setSelectedTab('resumes');
               this.router.navigate(['/resumes']);
             }, error => {
               this.isLoading = false;
