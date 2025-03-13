@@ -20,6 +20,7 @@ import { delay, of, switchMap } from 'rxjs';
 @Flowbite()
 export class AppComponent implements OnInit {
   title = 'resgen-ui';
+  selectedTab: string = 'home'; // Add a property to track
   isAuthenticated: boolean = false;
 
   userImageUrl: string | null = localStorage.getItem('user.picture'); // Initialize the string property
@@ -61,19 +62,23 @@ export class AppComponent implements OnInit {
     this.auth.login();
   }
 
-  openHomeTab(){
+  openHomeTab() {
+    this.selectedTab = 'home';
     this.router.navigate(['/home']);
   }
 
-  openProfilesTab(){
+  openProfilesTab() {
+    this.selectedTab = 'profiles';
     this.router.navigate(['/profiles']);
   }
 
-  openResumesTab(){
+  openResumesTab() {
+    this.selectedTab = 'resumes';
     this.router.navigate(['/resumes']);
   }
 
-  openAccountTab(){
+  openAccountTab() {
+    this.selectedTab = 'account';
     this.router.navigate(['/account']);
   }
 
