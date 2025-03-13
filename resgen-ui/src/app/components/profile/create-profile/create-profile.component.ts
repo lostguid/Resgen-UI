@@ -32,23 +32,29 @@ export class CreateProfileComponent implements AfterViewInit {
       linkedin: ['', [Validators.required, Validators.pattern('^(https?:\/\/)?(www\.)?linkedin\.com\/.*$')]],
       school: ['', Validators.required],
       loe: ['', Validators.required],
-      experiences: this.fb.array([])
+      experiences: this.fb.array([this.createExperienceFormGroup()])
     });
+    //this.initializeDatepickers()
   }
 
+  ngOnInit() {
+    setTimeout(() => this.initializeDatepickers(), 2000); // Reinitialize datepickers for new elements
+    
+  }
+
+
   ngAfterViewInit() {
-    this.initializeDatepickers();
+    //this.initializeDatepickers();
   }
 
   initializeDatepickers() {
-    const datepickerElements = document.querySelectorAll('[datepicker]');
-    datepickerElements.forEach((el) => {
+    const datepickerElements = document.querySelectorAll('[datepickerr]');
+    datepickerElements.forEach((el) => {      
       const datepicker = new Datepicker(el as HTMLElement, {
         // Optional: Add any datepicker options here
       });
       el.addEventListener('changeDate', (event: any) => {
         const input = event.target as HTMLInputElement;
-        debugger;
         const formControlName = input.getAttribute('id');        
         if (formControlName) {
           const splitString = formControlName.replace(/(\d+)$/, '.$1').replace(/(.*)\.(\d+)/, '$2.$1');
