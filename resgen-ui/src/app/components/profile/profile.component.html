@@ -6,15 +6,15 @@
     <table class="min-w-full bg-white border border-gray-300">
         <thead>
             <tr class="bg-gray-100">
-                <th class="py-2 px-4 border-b border-gray-300 text-left">Name</th>
-                <th class="py-2 px-4 border-b border-gray-300 text-left">Created Timestamp</th>
-                <th class="py-2 px-4 border-b border-gray-300 text-left">Actions</th>
+                <th class="py-2 px-4 border-b border-gray-300 text-left text-xs">NAME</th>
+                <th class="py-2 px-4 border-b border-gray-300 text-left text-xs">CREATED ON</th>
+                <th class="py-2 px-4 border-b border-gray-300 text-left text-xs"> </th>
             </tr>
         </thead>
         <tbody>
             <tr *ngFor="let profile of profiles" class="border-b border-gray-300">
-                <td class="py-2 px-4 border-b border-gray-300">{{ profile.profile_name }}</td>
-                <td class="py-2 px-4 border-b border-gray-300">{{ profile.created_at_in_utc | date:'short' }}</td>
+                <td class="py-2 px-4 border-b border-gray-300 text-sm font-medium">{{ profile.profile_name }}</td>
+                <td class="py-2 px-4 border-b border-gray-300 text-sm">{{ profile.created_at_in_utc | date:'short' }}</td>
                 <td class="py-2 px-4 border-b border-gray-300">
                     <button (click)="startEdit(profile)" class="text-white bg-blue-500 hover:bg-blue-700 rounded text-xs px-2 py-1 mr-2 cursor-pointer">Edit</button>
                     <button (click)="deleteProfile(profile.id)" class="text-white bg-red-500 hover:bg-red-700 rounded text-xs px-2 py-1 cursor-pointer">Delete</button>
