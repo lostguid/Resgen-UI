@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Flowbite } from '../../../flowbite-decorator';
 import { CommonModule } from '@angular/common';
 import { SafeUrlPipe } from '../../Pipes/safe-url.pipe';
@@ -6,36 +8,47 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
 
 @Component({
   selector: 'app-resume',
-  imports: [CommonModule, SafeUrlPipe,PdfViewerModule],
+  imports: [CommonModule, SafeUrlPipe, PdfViewerModule],
   templateUrl: './resume.component.html',
-  styleUrl: './resume.component.css'
+  styleUrls: ['./resume.component.css']
 })
 @Flowbite()
-export class ResumeComponent {
-  resumes = [
-    { id: 1, name: 'Resume 1', url: 'assets/resume1.pdf' },
-    { id: 2, name: 'Resume 2', url: 'assets/resume2.pdf' },
-    { id: 3, name: 'Resume 3', url: 'assets/resume3.pdf' }
-  ];
-
+export class ResumeComponent implements OnInit {
+  resumes: any[] = [];
   selectedResumeUrl: string | null = null;
 
-  viewResume(url: string) {
+  constructor(private http: HttpClient) {}
+
+  ngOnInit(): void {
+    this.loadResumes();
+  }
+
+  loadResumes(): void {
+    this.http.get<any[]>(`${environment.apiUrl}/Resume/user/`+localStorage.getItem('user.id')).subscribe(data => {
+      this.resumes = data;
+    });
+  }
+
+  viewResume(url: string): void {
     this.selectedResumeUrl = url;
-    console.log('Viewing resume:', this.selectedResumeUrl);
   }
 
-  deleteResume(id: number) {
-    this.resumes = this.resumes.filter(resume => resume.id !== id);
-    if (this.selectedResumeUrl && this.selectedResumeUrl.includes(`resume${id}.pdf`)) {
-      this.selectedResumeUrl = null;
-    }
-  }
-
-  downloadResume(url: string) {
+  downloadResume(url: string, name : string): void {
     const link = document.createElement('a');
     link.href = url;
-    link.download = url.split('/').pop() || 'resume.pdf';
+    if (!name.endsWith('.pdf')) {
+      name += '.pdf';
+    }
+    link.download = name;
     link.click();
+  }
+
+  deleteResume(id: number): void {
+    this.http.delete(`${environment.apiUrl}/Resume/${id}`).subscribe(() => {
+      this.resumes = this.resumes.filter(resume => resume.id !== id);
+      if (this.selectedResumeUrl && this.selectedResumeUrl.includes(id.toString())) {
+        this.selectedResumeUrl = null;
+      }
+    });
   }
 }

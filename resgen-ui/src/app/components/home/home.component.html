@@ -1,43 +1,65 @@
-<div class="container mx-auto p-4 mt-10 flex flex-col md:flex-row">
-  <!-- First Column -->
-  <div class="w-full md:w-1/3 p-2">
-    <div class="mb-4">
-      <label for="profileDropdown" class="block text-sm font-medium text-gray-700">Select Profile</label>
-      <select id="profileDropdown" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-        <option value="">Loading...</option>
-      </select>
+<div class="relative">
+  <div class="container mx-auto p-4 mt-10 flex flex-col md:flex-row" [class.opacity-50]="isLoading">
+    <!-- First Column -->
+    <div class="w-full md:w-1/3 p-2">
+      <div class="mb-4">
+        <label for="profileDropdown" class="block text-sm font-medium text-gray-700">Select Profile</label>
+        <select id="profileDropdown" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+          <option value="">Loading...</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label for="templateDropdown" class="block text-sm font-medium text-gray-700">Select Template</label>
+        <select id="templateDropdown" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+          <option value="">Loading...</option>
+        </select>
+      </div>
+      <button id="generateResumeButton" (click)="generateResume()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Generate Resume
+      </button>
     </div>
-    <div class="mb-4">
-      <label for="templateDropdown" class="block text-sm font-medium text-gray-700">Select Template</label>
-      <select id="templateDropdown" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-        <option value="">Loading...</option>
-      </select>
+    <!-- Second Column -->
+    <div class="w-full md:w-2/3 p-2">
+      <pdf-viewer [src]="selectedResumeUrl" [rotation]="0"
+      [original-size]="false"
+      [show-all]="true"
+      [fit-to-page]="false"
+      [zoom]="1.6"
+      [zoom-scale]="'page-height'"
+      [stick-to-page]="false"
+      [render-text]="true"
+      [external-link-target]="'blank'"
+      [autoresize]="true"
+      [show-borders]="true"
+      style="width: 100%; height: 70vh;"></pdf-viewer>
+      <div class="mt-10 flex justify-center space-x-2">
+        <button *ngIf="!showSaveTextbox" id="saveButton" (click)="toggleSaveTextbox()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+          Save
+        </button>
+        <button id="downloadButton" (click)="downloadResume()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          Download
+        </button>
+      </div>
+      <div *ngIf="showSaveTextbox" class="mt-2 flex flex-col items-center">
+        <label for="fileName" class="block text-sm font-medium text-gray-700">Enter File Name</label>
+        <input id="fileName" [(ngModel)]="fileName" class="mt-1 block w-1/4 pl-1 pr-8 py-1 text-sm border border-gray-400 bg-gray-100 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md" />
+        <button (click)="saveResume()" class="mt-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+          Confirm Save
+        </button>
+      </div>
     </div>
-    <button id="generateResumeButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-      Generate Resume
-    </button>
   </div>
-  <!-- Second Column -->
-  <div class="w-full md:w-2/3 p-2">
-    <pdf-viewer [src]="selectedResumeUrl" [rotation]="0"
-    [original-size]="false"
-    [show-all]="true"
-    [fit-to-page]="false"
-    [zoom]="1.1"
-    [zoom-scale]="'page-height'"
-    [stick-to-page]="false"
-    [render-text]="true"
-    [external-link-target]="'blank'"
-    [autoresize]="true"
-    [show-borders]="true"
-    style="width: 100%; height: 50vh;"></pdf-viewer>
-    <div class="mt-10 flex justify-center space-x-2">
-      <button id="saveButton" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-        Save
-      </button>
-      <button id="downloadButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-        Download
-      </button>
+
+  <!-- Loading Modal -->
+  <div *ngIf="isLoading" class="fixed inset-0 flex items-center justify-center bg-opacity-75 z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+      <div class="flex items-center space-x-2">
+        <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        <span>Loading...</span>
+      </div>
     </div>
   </div>
 </div>
