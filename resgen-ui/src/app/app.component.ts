@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet, Event } from '@angular/router';
 import { initFlowbite } from 'flowbite';
 import { IAMService } from './services/IAMService';
@@ -26,7 +26,15 @@ export class AppComponent implements OnInit {
   user: any = {};
 
 
-  constructor(private router: Router, public auth: IAMService, private http: HttpClient, private flowbiteService: FlowbiteService, private auth0: AuthService) {   
+  constructor(private eRef: ElementRef,private router: Router, public auth: IAMService, private http: HttpClient, private flowbiteService: FlowbiteService, private auth0: AuthService) {   
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClick(event: MouseEvent) {
+    const sidebar = document.getElementById('logo-sidebar');
+    if (sidebar && !this.eRef.nativeElement.contains(event.target as Node)) {
+      sidebar.classList.add('-translate-x-full');
+    }
   }
 
   ngOnInit(): void {

@@ -39,6 +39,7 @@ export class ResumeComponent implements OnInit {
     if (!name.endsWith('.pdf')) {
       name += '.pdf';
     }
+    link.target = '_blank'; // Open link in a new tab
     link.download = name;
     link.click();
   }
