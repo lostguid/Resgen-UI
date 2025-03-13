@@ -1,5 +1,5 @@
 import { Component, AfterViewInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Flowbite } from '../../../../flowbite-decorator';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -76,8 +76,23 @@ export class CreateProfileComponent implements AfterViewInit {
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
       skillsUsed: ['', Validators.required]
-    });
+    },{ validator: this.dateLessThan('startDate', 'endDate') });
   }
+
+  dateLessThan(start: string, end: string) {    
+    return (group: AbstractControl): { [key: string]: any } | null => {
+      const startDate = this.convertToDate(group.get(start)?.value);
+      const endDate = this.convertToDate(group.get(end)?.value);
+      console.log(startDate, endDate);
+      return startDate && endDate && startDate > endDate ? { 'dateInvalid': true } : null;
+    };
+  }
+
+  convertToDate(dateString: string): Date {
+    const [month, day, year] = dateString.split('/').map(part => parseInt(part, 10));
+    return new Date(year, month - 1, day);
+  }
+
 
   get experiences() {
     return this.form.get('experiences') as FormArray;
