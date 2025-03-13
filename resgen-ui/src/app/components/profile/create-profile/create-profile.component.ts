@@ -82,8 +82,7 @@ export class CreateProfileComponent implements AfterViewInit {
   dateLessThan(start: string, end: string) {    
     return (group: AbstractControl): { [key: string]: any } | null => {
       const startDate = this.convertToDate(group.get(start)?.value);
-      const endDate = this.convertToDate(group.get(end)?.value);
-      console.log(startDate, endDate);
+      const endDate = this.convertToDate(group.get(end)?.value);      
       return startDate && endDate && startDate > endDate ? { 'dateInvalid': true } : null;
     };
   }
