@@ -62,6 +62,14 @@ export class AppComponent implements OnInit {
       });
   }
 
+  ngAfterViewInit() {
+    this.http.get<any>(environment.apiUrl + `/User/userId/` + localStorage.getItem('user.id'))
+      .subscribe(response => {
+        this.user = response;
+        this.userImageUrl = localStorage.getItem('user.picture');
+      });
+  }
+
   login() {
     this.auth.login();
   }
