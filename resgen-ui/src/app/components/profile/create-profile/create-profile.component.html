@@ -31,10 +31,10 @@
                 <div *ngIf="form.get('email')?.touched && form.get('email')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('email') }}</div>
             </div>
             <div>
-                <label for="linkedin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">LinkedIn URL</label>
-                <input formControlName="linkedin" type="url" id="linkedin" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="https://www.linkedin.com/in/johndoe/" required />
-                <div *ngIf="form.get('linkedin')?.touched && form.get('linkedin')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('linkedin') }}</div>
-            </div>
+              <label for="linkedin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">LinkedIn URL</label>
+              <input formControlName="linkedin" type="url" id="linkedin" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+              <div *ngIf="form.get('linkedin')?.touched && form.get('linkedin')?.invalid" class="text-red-500 text-sm">{{ getErrorMessage('linkedin') }}</div>
+          </div>
             <div>
                 <label for="school" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">School Name</label>
                 <input formControlName="school" type="text" id="school" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="University of Cincinnati" required />
@@ -61,12 +61,12 @@
                     </div>
                     <div>
                         <label [for]="'startDate' + i" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start Date</label>
-                        <input [formControlName]="'startDate'" [id]="'startDate' + i" type="text" datepickerr class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select start date" required />
+                        <input [formControlName]="'startDate'" [id]="'startDate' + i" type="text" datepickerr class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="MM/DD/YYYY" required />
                         <div *ngIf="experience.get('startDate')?.touched && experience.get('startDate')?.invalid" class="text-red-500 text-sm">{{ getExperienceErrorMessage(i, 'startDate') }}</div>
                     </div>
                     <div>
                         <label [for]="'endDate' + i" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End Date</label>
-                        <input [formControlName]="'endDate'" [id]="'endDate' + i" type="text" datepickerr class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select end date" required />
+                        <input [formControlName]="'endDate'" [id]="'endDate' + i" type="text" datepickerr class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="MM/DD/YYYY" required />
                         <div *ngIf="experience.get('endDate')?.touched && experience.get('endDate')?.invalid" class="text-red-500 text-sm">{{ getExperienceErrorMessage(i, 'endDate') }}</div>
                         <div *ngIf="experience.errors?.['dateInvalid']" class="text-red-500 text-sm">End date must be greater than start date</div>
                     </div>

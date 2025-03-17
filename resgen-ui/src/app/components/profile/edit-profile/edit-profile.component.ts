@@ -47,6 +47,7 @@ export class EditProfileComponent implements OnInit {
 
   ngOnInit() {
     this.loadProfile();
+    setTimeout(() => this.initializeDatepickers(), 1000); // Reinitialize datepickers for new elements
   }
 
   ngAfterViewInit() {

@@ -29,7 +29,7 @@ export class CreateProfileComponent implements AfterViewInit {
       lastName: ['', Validators.required],
       phone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       email: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')]],
-      linkedin: ['', [Validators.required, Validators.pattern('^(https?:\/\/)?(www\.)?linkedin\.com\/.*$')]],
+      linkedin: ['https://www.linkedin.com/in/', [Validators.required, Validators.pattern('^(https?:\/\/)?(www\.)?linkedin\.com\/.*$')]],
       school: ['', Validators.required],
       loe: ['', Validators.required],
       experiences: this.fb.array([this.createExperienceFormGroup()])
@@ -38,7 +38,7 @@ export class CreateProfileComponent implements AfterViewInit {
   }
 
   ngOnInit() {
-    setTimeout(() => this.initializeDatepickers(), 2000); // Reinitialize datepickers for new elements
+    setTimeout(() => this.initializeDatepickers(), 1000); // Reinitialize datepickers for new elements
     
   }
 
