@@ -14,5 +14,5 @@ export const routes: Routes = [
     { path: 'resumes', component: ResumeComponent, canActivate: [AuthGuard] },
     { path: 'profiles/create', component: CreateProfileComponent, canActivate: [AuthGuard] },
     { path: 'profiles/edit/:id', component: EditProfileComponent, canActivate: [AuthGuard]  },
-    { path: '', redirectTo: '/', pathMatch: 'full' }
+    { path: '', redirectTo: '/home', pathMatch: 'full' }
 ];

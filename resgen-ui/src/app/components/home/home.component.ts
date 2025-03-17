@@ -171,6 +171,6 @@ export class HomeComponent implements AfterViewInit {
 
   viewResume(url: string): void {
     this.selectedResumeUrl = url;
-    console.log('Viewing resume:', this.selectedResumeUrl);
+    //console.log('Viewing resume:', this.selectedResumeUrl);
   }
 }

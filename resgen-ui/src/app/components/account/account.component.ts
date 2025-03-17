@@ -23,6 +23,7 @@ export class AccountComponent {
     let userId = localStorage.getItem('user.id');
     this.http.get<any>(environment.apiUrl+`/User/userId/` + userId).subscribe(response=>{      
       this.user = response;
+      //console.log(response);
     });
   }
 
