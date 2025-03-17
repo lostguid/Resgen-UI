@@ -35,6 +35,12 @@ export class IAMService {
                                 localStorage.setItem('user.picture', user?.picture || '');
 
                             }
+                            else{
+                                localStorage.setItem('user.id', user?.sub || '');
+                                localStorage.setItem('user.name', user?.name || '');
+                                localStorage.setItem('user.email', user?.email || '');
+                                localStorage.setItem('user.picture', user?.picture || '');
+                            }
                         });
                     }
 
