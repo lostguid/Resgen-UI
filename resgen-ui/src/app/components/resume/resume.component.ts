@@ -3,12 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Flowbite } from '../../../flowbite-decorator';
 import { CommonModule } from '@angular/common';
-import { SafeUrlPipe } from '../../Pipes/safe-url.pipe';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 
 @Component({
   selector: 'app-resume',
-  imports: [CommonModule, SafeUrlPipe, PdfViewerModule],
+  imports: [CommonModule, PdfViewerModule],
   templateUrl: './resume.component.html',
   styleUrls: ['./resume.component.css']
 })
