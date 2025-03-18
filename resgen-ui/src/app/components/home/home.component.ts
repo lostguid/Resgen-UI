@@ -47,6 +47,8 @@ export class HomeComponent implements AfterViewInit {
         if (selectedTemplate) {
           this.viewResume(selectedTemplate.template_sample_url);
         }
+        // Reset the Save and Download buttons visibility
+      this.showSaveAndDownloadButtons = false;
       });
     }
   }
