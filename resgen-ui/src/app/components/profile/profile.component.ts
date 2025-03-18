@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { ModalComponent } from '../modal/modal.component';
+import { Flowbite } from '../../../flowbite-decorator';
 
 @Component({
   selector: 'app-profile',
@@ -12,6 +13,7 @@ import { ModalComponent } from '../modal/modal.component';
   styleUrls: ['./profile.component.css'],
   imports: [CommonModule, ReactiveFormsModule, ModalComponent],
 })
+@Flowbite()
 export class ProfileComponent implements OnInit {
   profiles: any = [];
   editForm: FormGroup;
