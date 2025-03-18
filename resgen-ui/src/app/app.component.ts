@@ -1,5 +1,6 @@
 import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
-import { NavigationEnd, Router, RouterOutlet, Event } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import type { Event } from '@angular/router';
 import { initFlowbite } from 'flowbite';
 import { IAMService } from './services/IAMService';
 import { CommonModule } from '@angular/common';
@@ -77,21 +78,31 @@ export class AppComponent implements OnInit {
   openHomeTab() {
     this.selectedTab = 'home';
     this.router.navigate(['/home']);
+    this.closeSidebar();
   }
 
   openProfilesTab() {
     this.selectedTab = 'profiles';
     this.router.navigate(['/profiles']);
+    this.closeSidebar();
   }
 
   openResumesTab() {
     this.selectedTab = 'resumes';
     this.router.navigate(['/resumes']);
+    this.closeSidebar();
   }
 
   openAccountTab() {
     this.selectedTab = 'account';
     this.router.navigate(['/account']);
+    this.closeSidebar();
+  }
+  closeSidebar() {
+    const toggleButton = document.getElementById('side-bar-button'); // Find the button by its ID
+    if (toggleButton) {
+      toggleButton.dispatchEvent(new Event('click')); // Simulate a click on the button
+    }
   }
 
   logout() {
