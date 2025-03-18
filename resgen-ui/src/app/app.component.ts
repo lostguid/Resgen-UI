@@ -99,10 +99,20 @@ export class AppComponent implements OnInit {
     this.closeSidebar();
   }
   closeSidebar() {
+    
     const toggleButton = document.getElementById('side-bar-button'); // Find the button by its ID
-    if (toggleButton) {
+    //debugger;
+    if (toggleButton && !this.isSidebarHidden()) { // Check if the sidebar is not hidden
       toggleButton.dispatchEvent(new Event('click')); // Simulate a click on the button
     }
+  }
+
+  isSidebarHidden(): boolean {
+    const sidebar = document.querySelector('[aria-label="Sidebar"]'); // Find the sidebar using aria-label
+    if (sidebar) {
+      return sidebar.classList.contains('-translate-x-full'); // Check if the sidebar has the class that hides it
+    }
+    return true; // If the sidebar element is not found, assume it's hidden
   }
 
   logout() {
