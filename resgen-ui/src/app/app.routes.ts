@@ -9,7 +9,7 @@ import { EditProfileComponent } from './components/profile/edit-profile/edit-pro
 import { WelcomeComponent } from './components/welcome/welcome.component';
 
 export const routes: Routes = [  
-    { path: 'home', component: HomeComponent },
+    { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
     { path: 'welcome', component: WelcomeComponent },
     { path: 'account', component: AccountComponent, canActivate: [AuthGuard] },
     { path: 'profiles', component: ProfileComponent, canActivate: [AuthGuard] },
