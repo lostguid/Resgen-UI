@@ -6,7 +6,6 @@ import { IAMService } from './services/IAMService';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
-import { HomeComponent } from './components/home/home.component';
 import { FlowbiteService } from './services/FlowBite.service';
 import { AuthService } from '@auth0/auth0-angular';
 import { Flowbite } from '../flowbite-decorator';
@@ -22,14 +21,23 @@ import { TabService } from './services/tab.service';
 @Flowbite()
 export class AppComponent implements OnInit {
   title = 'resgen-ui';
-  selectedTab: string = 'home'; // Add a property to track
+  selectedTab: string = 'home';
   isAuthenticated: boolean = false;
+  isLoading: boolean = true; // Add isLoading property
 
-  userImageUrl: string | null = localStorage.getItem('user.picture'); // Initialize the string property
+  userImageUrl: string | null = localStorage.getItem('user.picture');
   user: any = {};
+  excludedRoutes = ['/welcome']; // Add routes where `isAuthenticated` is not required
 
-
-  constructor(private eRef: ElementRef, private router: Router, public auth: IAMService, private http: HttpClient, private flowbiteService: FlowbiteService, private auth0: AuthService, private tabService: TabService) {
+  constructor(
+    private eRef: ElementRef,
+    private router: Router,
+    public auth: IAMService,
+    private http: HttpClient,
+    private flowbiteService: FlowbiteService,
+    private auth0: AuthService,
+    private tabService: TabService
+  ) {
     this.tabService.selectedTab$.subscribe(tab => {
       this.selectedTab = tab;
     });
@@ -43,32 +51,39 @@ export class AppComponent implements OnInit {
     }
   }
 
+  shouldCheckAuthentication(): boolean {    
+    return !this.excludedRoutes.includes(this.router.url);
+  }
+
   ngOnInit(): void {
-    // this.flowbiteService.loadFlowbite((flowbite) => {
-    //   initFlowbite();
-    // });
     this.auth0.isAuthenticated$.subscribe(
       (isAuthenticated) => {
         this.isAuthenticated = isAuthenticated;
-        if (this.isAuthenticated == true) {
-
-          of(null).pipe(
-            delay(1),
-            switchMap(() => this.http.get<any>(environment.apiUrl + `/User/userId/` + localStorage.getItem('user.id')))
-          ).subscribe(response => {
-            this.user = response;
-            this.userImageUrl = localStorage.getItem('user.picture');
-          });
+        if (this.isAuthenticated) {
+          of(null)
+            .pipe(
+              delay(1),
+              switchMap(() =>
+                this.http.get<any>(
+                  environment.apiUrl +
+                    `/User/userId/` +
+                    localStorage.getItem('user.id')
+                )
+              )
+            )
+            .subscribe(response => {
+              this.user = response;
+              this.userImageUrl = localStorage.getItem('user.picture');
+              this.isLoading = false; // Set isLoading to false after data is loaded
+            });
+        } else {
+          this.isLoading = false; // Set isLoading to false if not authenticated
         }
-      });
-  }
-
-  ngAfterViewInit() {
-    // this.http.get<any>(environment.apiUrl + `/User/userId/` + localStorage.getItem('user.id'))
-    //   .subscribe(response => {
-    //     this.user = response;
-    //     this.userImageUrl = localStorage.getItem('user.picture');
-    //   });
+      },
+      () => {
+        this.isLoading = false; // Set isLoading to false on error
+      }
+    );
   }
 
   login() {
@@ -98,21 +113,20 @@ export class AppComponent implements OnInit {
     this.router.navigate(['/account']);
     this.closeSidebar();
   }
+
   closeSidebar() {
-    
-    const toggleButton = document.getElementById('side-bar-button'); // Find the button by its ID
-    //debugger;
-    if (toggleButton && !this.isSidebarHidden()) { // Check if the sidebar is not hidden
-      toggleButton.dispatchEvent(new Event('click')); // Simulate a click on the button
+    const toggleButton = document.getElementById('side-bar-button');
+    if (toggleButton && !this.isSidebarHidden()) {
+      toggleButton.dispatchEvent(new Event('click'));
     }
   }
 
   isSidebarHidden(): boolean {
-    const sidebar = document.querySelector('[aria-label="Sidebar"]'); // Find the sidebar using aria-label
+    const sidebar = document.querySelector('[aria-label="Sidebar"]');
     if (sidebar) {
-      return sidebar.classList.contains('-translate-x-full'); // Check if the sidebar has the class that hides it
+      return sidebar.classList.contains('-translate-x-full');
     }
-    return true; // If the sidebar element is not found, assume it's hidden
+    return true;
   }
 
   logout() {
