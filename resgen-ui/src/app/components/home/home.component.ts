@@ -21,6 +21,7 @@ export class HomeComponent implements AfterViewInit {
   token: string | null = null;
   isLoggedIn: boolean = false;
   isAuthenticated: boolean = false;
+  showSaveAndDownloadButtons: boolean = false;
 
   profiles: any[] = [];
   templates: any[] = [];
@@ -99,6 +100,7 @@ export class HomeComponent implements AfterViewInit {
       this.http.get(`${environment.apiUrl}/Resume/generate-resume?profileId=${profileId}&templateId=${templateId}&userId=${localStorage.getItem('user.id')}`, { responseType: 'blob' })
         .subscribe(response => {
           this.isLoading = false;
+          this.showSaveAndDownloadButtons = true;
           const url = window.URL.createObjectURL(response);
           this.selectedResumeUrl = url;
         }, error => {
