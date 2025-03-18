@@ -1,6 +1,15 @@
 <!-- component.html -->
 <div *ngIf="isLoading" class="fixed top-0 left-0 w-full h-1 bg-blue-500 animate-pulse">
-
+    <div class="flex items-center justify-center min-h-screen bg-gray-100">
+        <div class="p-5 bg-white rounded-lg shadow-lg">
+            <div class="flex items-center space-x-2">
+                <svg class="w-6 h-6 text-blue-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v2m0 12v2m8-10h-2M6 12H4m14.36-6.36l-1.42 1.42M7.05 18.36l-1.42-1.42m12.73 0l-1.42-1.42M7.05 5.64l-1.42 1.42"></path>
+                </svg>
+                <span class="text-lg font-medium text-gray-700">Loading...</span>
+            </div>
+        </div>
+    </div>
 </div>
 <div *ngIf="!isLoading">
     <nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
