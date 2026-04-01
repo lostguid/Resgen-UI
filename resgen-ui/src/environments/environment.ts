@@ -1,6 +1,6 @@
 export const environment = {
     production: true,
-    apiUrl: 'http://localhost:5039/api',
+    apiUrl: 'https://localhost:7099/api',
     auth: {
       domain: 'resgen-ai.us.auth0.com',
       clientId: 'rsY5nSoucGcdP2wPKOSA45KquQIEEY6T',
