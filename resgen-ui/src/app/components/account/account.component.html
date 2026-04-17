@@ -1,12 +1,125 @@
-<div class="container mx-auto p-6">
-    <div class="bg-white shadow-lg rounded-lg p-6">
-        <div class="flex items-center">
-            <!-- <img class="w-24 h-24 rounded-full mr-6" src="" alt="Profile Picture"> -->
-            <div>
-                <h2 class="text-2xl font-bold">{{this.user.name}}</h2>
-                <p class="text-gray-600">{{this.user.email}}</p> 
-                <p class="text-gray-600">Is Email verified : {{this.user.is_email_verified}}</p>                
-                <p class="text-gray-600">Tokens used : {{this.user.tokens_used}}</p>               
+<div class="min-h-screen bg-slate-50 dark:bg-gray-900 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Account</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Your profile and usage information.</p>
+        </div>
+
+        <!-- Loading skeleton -->
+        <div *ngIf="isLoading" class="space-y-6 animate-pulse">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+                <div class="flex items-center gap-5">
+                    <div class="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                    <div class="flex-1 space-y-3">
+                        <div class="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-3 w-64 bg-gray-100 dark:bg-gray-700/60 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="!isLoading" class="space-y-6">
+            <!-- Identity card -->
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="h-24 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+                <div class="px-6 pb-6">
+                    <div class="flex flex-col sm:flex-row sm:items-end sm:gap-5 -mt-12">
+                        <div class="flex-shrink-0">
+                            <img *ngIf="userImageUrl" [src]="userImageUrl" alt="Profile picture"
+                                class="h-24 w-24 rounded-full ring-4 ring-white dark:ring-gray-800 object-cover bg-white" />
+                            <div *ngIf="!userImageUrl"
+                                class="h-24 w-24 rounded-full ring-4 ring-white dark:ring-gray-800 bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-2xl font-semibold flex items-center justify-center">
+                                {{ initials }}
+                            </div>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:pb-1 min-w-0 flex-1">
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white truncate">
+                                {{ user.name || 'Unknown user' }}
+                            </h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ user.email }}</p>
+                        </div>
+                        <div class="mt-3 sm:mt-0 sm:pb-1">
+                            <span *ngIf="user.is_email_verified"
+                                class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-full px-2.5 py-1 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Email verified
+                            </span>
+                            <span *ngIf="!user.is_email_verified"
+                                class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 5c-.77-1.33-2.69-1.33-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z" />
+                                </svg>
+                                Email not verified
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Details + Usage -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-2 bg-white dark:bg-gray-800 shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Profile information</h3>
+                    </div>
+                    <dl class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <div class="px-6 py-4 grid grid-cols-3 gap-4 items-center">
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Full name</dt>
+                            <dd class="col-span-2 text-sm text-gray-900 dark:text-gray-100">{{ user.name || '—' }}</dd>
+                        </div>
+                        <div class="px-6 py-4 grid grid-cols-3 gap-4 items-center">
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
+                            <dd class="col-span-2 text-sm text-gray-900 dark:text-gray-100 break-all">{{ user.email || '—' }}</dd>
+                        </div>
+                        <div class="px-6 py-4 grid grid-cols-3 gap-4 items-center">
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Email status</dt>
+                            <dd class="col-span-2 text-sm">
+                                <span *ngIf="user.is_email_verified" class="text-green-700 dark:text-green-400">Verified</span>
+                                <span *ngIf="!user.is_email_verified" class="text-amber-700 dark:text-amber-400">Not verified</span>
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Usage</h3>
+                    </div>
+                    <div class="px-6 py-5">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tokens used</div>
+                                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ user.tokens_used || 0 | number }}</div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Tokens are consumed each time you generate a resume.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700">
+                <div class="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Sign out</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">End your session on this device.</p>
+                    </div>
+                    <button (click)="logout()"
+                        class="inline-flex justify-center items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg px-4 py-2 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Sign out
+                    </button>
+                </div>
             </div>
         </div>
     </div>

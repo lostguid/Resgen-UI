@@ -90,6 +90,15 @@ export class AppComponent implements OnInit {
     this.auth.login();
   }
 
+  get userInitials(): string {
+    const source = (this.user?.name || this.user?.email || '').trim();
+    if (!source) return 'U';
+    const parts = source.split(/\s+/);
+    const first = parts[0]?.[0] || '';
+    const second = parts[1]?.[0] || '';
+    return (first + second).toUpperCase() || source[0].toUpperCase();
+  }
+
   openHomeTab() {
     this.selectedTab = 'home';
     this.router.navigate(['/home']);

@@ -17,17 +17,33 @@ import { Flowbite } from '../../../flowbite-decorator';
 @Flowbite()
 export class AccountComponent {
 
-  user:any = {};
+  user: any = {};
+  isLoading = true;
+  userImageUrl: string | null = localStorage.getItem('user.picture');
 
   constructor(public auth: IAMService, public auth0: AuthService, public http: HttpClient, private flowbiteService: FlowbiteService) {
     let userId = localStorage.getItem('user.id');
-    this.http.get<any>(environment.apiUrl+`/User/userId/` + userId).subscribe(response=>{      
-      this.user = response;
-      //console.log(response);
+    this.http.get<any>(environment.apiUrl + `/User/userId/` + userId).subscribe({
+      next: response => {
+        this.user = response || {};
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      }
     });
   }
 
-  ngonInit() {
+  get initials(): string {
+    const source = (this.user?.name || this.user?.email || '').trim();
+    if (!source) return '?';
+    const parts = source.split(/\s+/);
+    const first = parts[0]?.[0] || '';
+    const second = parts[1]?.[0] || '';
+    return (first + second).toUpperCase() || source[0].toUpperCase();
   }
 
+  logout() {
+    this.auth.logout();
+  }
 }

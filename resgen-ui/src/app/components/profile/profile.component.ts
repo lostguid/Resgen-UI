@@ -17,8 +17,11 @@ import { Flowbite } from '../../../flowbite-decorator';
 export class ProfileComponent implements OnInit {
   profiles: any = [];
   editForm: FormGroup;
+  isLoading = true;
   showModal = false;
   showDeleteModal = false;
+  profileToDelete: any = null;
+  isDeleting = false;
   modalTitle = '';
   modalMessage = '';
   modalClass = '';
@@ -35,37 +38,66 @@ export class ProfileComponent implements OnInit {
   }
 
   loadProfiles() {
-    this.http.get<any[]>(`${environment.apiUrl}/profile/user/` + localStorage.getItem('user.id')).subscribe(data => {
-      this.profiles = data;
+    this.isLoading = true;
+    this.http.get<any[]>(`${environment.apiUrl}/profile/user/` + localStorage.getItem('user.id')).subscribe({
+      next: data => {
+        this.profiles = data || [];
+        this.isLoading = false;
+      },
+      error: () => {
+        this.profiles = [];
+        this.isLoading = false;
+      }
     });
+  }
+
+  getInitials(profile: any): string {
+    const source = (profile?.profile_name || profile?.name || '').trim();
+    if (!source) return '?';
+    const parts = source.split(/\s+/);
+    const first = parts[0]?.[0] || '';
+    const second = parts[1]?.[0] || '';
+    return (first + second).toUpperCase() || '?';
   }
 
   startEdit(profile: any) {
     this.router.navigate(['/profiles/edit/', profile.id]);
   }
 
-  deleteProfile(id: number) {
-    const confirmed = confirm('Are you sure you want to delete this profile?');
-    if (confirmed) {
-      this.http.delete(`${environment.apiUrl}/profile/${id}`).subscribe(
-        response => {
-          this.profiles = this.profiles.filter((profile: any) => profile.id !== id);
-          this.showModal = true;
-          this.modalTitle = 'Success';
-          this.modalMessage = 'Profile deleted successfully';
-          // this.modalClass = 'bg-green-500';
-          // this.modalIcon = 'M5 13l4 4L19 7';
-        },
-        error => {
-          this.showModal = true;
-          this.modalTitle = 'Error';
-          this.modalMessage = 'Error deleting profile';
-          // this.modalClass = 'bg-red-500';
-          // this.modalIcon = 'M6 18L18 6M6 6l12 12';
-        }
+  askDeleteProfile(profile: any) {
+    this.profileToDelete = profile;
+    this.showDeleteModal = true;
+  }
 
-      );
-    }
+  cancelDelete() {
+    if (this.isDeleting) return;
+    this.showDeleteModal = false;
+    this.profileToDelete = null;
+  }
+
+  confirmDelete() {
+    if (!this.profileToDelete || this.isDeleting) return;
+    const id = this.profileToDelete.id;
+    this.isDeleting = true;
+    this.http.delete(`${environment.apiUrl}/profile/${id}`).subscribe(
+      () => {
+        this.profiles = this.profiles.filter((profile: any) => profile.id !== id);
+        this.isDeleting = false;
+        this.showDeleteModal = false;
+        this.profileToDelete = null;
+        this.showModal = true;
+        this.modalTitle = 'Success';
+        this.modalMessage = 'Profile deleted successfully';
+      },
+      () => {
+        this.isDeleting = false;
+        this.showDeleteModal = false;
+        this.profileToDelete = null;
+        this.showModal = true;
+        this.modalTitle = 'Error';
+        this.modalMessage = 'Error deleting profile';
+      }
+    );
   }
 
   addProfile() {

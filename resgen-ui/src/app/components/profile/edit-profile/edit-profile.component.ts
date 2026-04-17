@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
@@ -71,16 +71,48 @@ export class EditProfileComponent implements OnInit {
   }
 
   setExperiences(experiences: any[]) {
-    const experienceFormGroups = experiences.map(exp => this.fb.group({
-      companyName: [exp.company_name, Validators.required],
-      title: [exp.title, Validators.required],
-      startDate: [exp.start_date_in_utc, Validators.required],
-      endDate: [exp.end_date_in_utc, Validators.required],
-      skillsUsed: [exp.skills_used.join(', '), Validators.required]
-    }));
+    const experienceFormGroups = experiences.map(exp => this.createExperienceFormGroup(exp));
     const experienceFormArray = this.fb.array(experienceFormGroups);
     this.editForm.setControl('experiences', experienceFormArray);
     this.initializeDatepickers();
+  }
+
+  createExperienceFormGroup(exp?: any): FormGroup {
+    return this.fb.group({
+      companyName: [exp?.company_name ?? '', Validators.required],
+      title: [exp?.title ?? '', Validators.required],
+      startDate: [exp?.start_date_in_utc ?? '', [Validators.required, this.validDate]],
+      endDate: [exp?.end_date_in_utc ?? '', [Validators.required, this.validDate]],
+      skillsUsed: [exp?.skills_used ? exp.skills_used.join(', ') : '', Validators.required]
+    }, { validator: this.dateLessThan('startDate', 'endDate') });
+  }
+
+  validDate(control: AbstractControl): { [key: string]: any } | null {
+    const value = control.value;
+    if (!value) return null;
+    const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+    if (!match) return { invalidDate: true };
+    const month = parseInt(match[1], 10);
+    const day = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
+    const d = new Date(year, month - 1, day);
+    if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) {
+      return { invalidDate: true };
+    }
+    return null;
+  }
+
+  dateLessThan(start: string, end: string) {
+    return (group: AbstractControl): { [key: string]: any } | null => {
+      const startDate = this.convertToDate(group.get(start)?.value);
+      const endDate = this.convertToDate(group.get(end)?.value);
+      return startDate && endDate && startDate > endDate ? { 'dateInvalid': true } : null;
+    };
+  }
+
+  convertToDate(dateString: string): Date {
+    const [month, day, year] = (dateString || '').split('/').map(part => parseInt(part, 10));
+    return new Date(year, month - 1, day);
   }
 
   initializeDatepickers() {
@@ -110,13 +142,7 @@ export class EditProfileComponent implements OnInit {
   }
 
   addExperience() {
-    this.experiences.push(this.fb.group({
-      companyName: ['', Validators.required],
-      title: ['', Validators.required],
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
-      skillsUsed: ['', Validators.required]
-    }));
+    this.experiences.push(this.createExperienceFormGroup());
     setTimeout(() => this.initializeDatepickers(), 0); // Reinitialize datepickers for new elements
   }
 
@@ -143,6 +169,9 @@ export class EditProfileComponent implements OnInit {
     const control = experience?.get(controlName);
     if (control?.hasError('required')) {
       return 'Field cannot be empty';
+    }
+    if (control?.hasError('invalidDate')) {
+      return 'Enter a valid date (MM/DD/YYYY)';
     }
     return 'Invalid Input';
   }

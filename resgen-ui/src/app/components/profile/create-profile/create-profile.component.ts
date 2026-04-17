@@ -73,10 +73,25 @@ export class CreateProfileComponent implements AfterViewInit {
     return this.fb.group({
       companyName: ['', Validators.required],
       title: ['', Validators.required],
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
+      startDate: ['', [Validators.required, this.validDate]],
+      endDate: ['', [Validators.required, this.validDate]],
       skillsUsed: ['', Validators.required]
     },{ validator: this.dateLessThan('startDate', 'endDate') });
+  }
+
+  validDate(control: AbstractControl): { [key: string]: any } | null {
+    const value = control.value;
+    if (!value) return null;
+    const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+    if (!match) return { invalidDate: true };
+    const month = parseInt(match[1], 10);
+    const day = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
+    const d = new Date(year, month - 1, day);
+    if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) {
+      return { invalidDate: true };
+    }
+    return null;
   }
 
   dateLessThan(start: string, end: string) {    
@@ -125,6 +140,9 @@ export class CreateProfileComponent implements AfterViewInit {
     const control = experience?.get(controlName);
     if (control?.hasError('required')) {
       return 'Field cannot be empty';
+    }
+    if (control?.hasError('invalidDate')) {
+      return 'Enter a valid date (MM/DD/YYYY)';
     }
     return 'Invalid Input';
   }

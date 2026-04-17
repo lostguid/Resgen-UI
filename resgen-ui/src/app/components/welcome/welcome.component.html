@@ -1,31 +1,105 @@
-<div class="container mx-auto mt-10">
-    <div class="bg-white shadow-md rounded-lg p-6">
-        <h1 class="text-2xl font-bold mb-4 text-center text-gray-800">Gen your Res!</h1>
-        <p class="text-gray-600 mb-6 text-center">Step by Step Guide:</p>
-        
-        <!-- Step 1 -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold mb-2 text-gray-800">Step 1: Create Profile</h2>
-            <p class="text-gray-600 mb-4">Start by creating your profile. Provide your basic information such as name, email, past experience and skills used</p>
-            <button 
-                class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                (click)="navigateToCreateProfile()">
-                Create Profile
-            </button>
+<div class="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
+    <!-- Hero -->
+    <app-hero-highlight>
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+            <div class="inline-flex items-center gap-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-3 py-1 mb-6 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.847.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                </svg>
+                AI-powered resume generation
+            </div>
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white flex flex-col items-center gap-4">
+                <span>Generate polished resumes</span>
+                <app-highlight>in seconds.</app-highlight>
+            </h1>
+            <p class="mt-5 max-w-xl mx-auto text-base sm:text-lg text-gray-600 dark:text-gray-400">
+                Build a profile once, then let Resgen tailor your work history into a polished PDF for any role. No formatting, no fuss.
+            </p>
+            <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+                <button (click)="getStarted()"
+                    class="inline-flex justify-center items-center gap-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 rounded-lg px-6 py-3 shadow-sm transition-colors">
+                    Get started
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                </button>
+                <a href="#how-it-works"
+                    class="inline-flex justify-center items-center text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg px-6 py-3 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700">
+                    How it works
+                </a>
+            </div>
         </div>
+    </app-hero-highlight>
 
-        <!-- Step 2 -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold mb-2 text-gray-800">Step 2: Select Template</h2>
-            <p class="text-gray-600 mb-4">Choose a template that suits your needs. We offer two templates to select from as of now. More to come!</p>
-            <!-- <button class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Select Template</button> -->
-        </div>
+    <!-- How it works -->
+    <section id="how-it-works" class="py-16">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Three steps to your next resume</h2>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">From blank page to polished PDF in minutes.</p>
+            </div>
 
-        <!-- Step 3 -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold mb-2 text-gray-800 animate-bounce">Step 3: RESGEN</h2>
-            <p class="text-gray-600 mb-4">Once you have created your profile and selected a template, you can generate the resume, save and download!</p>
-            <!-- <button class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Generate</button> -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="absolute -top-3 left-6 flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white text-xs font-bold shadow-sm">1</div>
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 mb-4 dark:bg-blue-900/30 dark:text-blue-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">Create your profile</h3>
+                    <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+                        Contact info, education, and work history. Save multiple profiles for different roles or industries.
+                    </p>
+                </div>
+
+                <div class="relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="absolute -top-3 left-6 flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white text-xs font-bold shadow-sm">2</div>
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 mb-4 dark:bg-blue-900/30 dark:text-blue-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h5l2 2h8a1 1 0 011 1v11a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">Pick a template</h3>
+                    <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+                        Choose from our curated templates. Preview the layout before generating anything.
+                    </p>
+                </div>
+
+                <div class="relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="absolute -top-3 left-6 flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white text-xs font-bold shadow-sm">3</div>
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 mb-4 dark:bg-blue-900/30 dark:text-blue-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                        </svg>
+                    </div>
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">Generate &amp; download</h3>
+                    <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+                        Preview, save to your library, and download the PDF. Regenerate anytime — your data is always one click away.
+                    </p>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="py-16">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 px-6 py-10 sm:py-12 text-center shadow-lg">
+                <div class="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
+                <div class="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
+                <h2 class="relative text-2xl sm:text-3xl font-bold text-white">Ready to build your resume?</h2>
+                <p class="relative mt-2 text-sm sm:text-base text-blue-100 max-w-md mx-auto">
+                    Sign in with your account and create your first profile in under two minutes.
+                </p>
+                <button (click)="getStarted()"
+                    class="relative mt-6 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 bg-white hover:bg-blue-50 rounded-lg px-6 py-3 shadow-sm transition-colors">
+                    Get started free
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </section>
 </div>

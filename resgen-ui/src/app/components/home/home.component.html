@@ -1,65 +1,182 @@
-<div class="relative">
-  <div class="container mx-auto p-4 flex flex-col md:flex-row" [class.opacity-50]="isLoading">
-    <!-- First Column -->
-    <div class="w-full md:w-1/2 p-4 overflow-auto bg-white h-1/2 md:h-full">
-      <div class="mb-4">
-        <label for="profileDropdown" class="block text-sm font-medium text-gray-700">Select Profile</label>
-        <select id="profileDropdown" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-          <option value="">Loading...</option>
-        </select>
-      </div>
-      <div class="mb-4">
-        <label for="templateDropdown" class="block text-sm font-medium text-gray-700">Select Template</label>
-        <select id="templateDropdown" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-          <option value="">Loading...</option>
-        </select>
-      </div>
-      <button id="generateResumeButton" (click)="generateResume()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-        Generate Resume
-      </button>
-    </div>
-    <!-- Second Column -->
-    <div class="w-full md:w-1/2 p-4 h-1/2 md:h-full">
-      <pdf-viewer [src]="selectedResumeUrl" [rotation]="0"
-      [original-size]="false"
-      [show-all]="true"
-      [fit-to-page]="false"
-      [zoom]="1"
-      [zoom-scale]="'page-height'"
-      [stick-to-page]="false"
-      [render-text]="true"
-      [external-link-target]="'blank'"
-      [autoresize]="true"
-      [show-borders]="true"
-      style="width: 100%; height: 75vh;"></pdf-viewer>
-      <div class="mt-2 flex justify-center space-x-2" *ngIf="showSaveAndDownloadButtons">
-        <button *ngIf="!showSaveTextbox" id="saveButton" (click)="toggleSaveTextbox()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-          Save
-        </button>
-        <button id="downloadButton" (click)="downloadResume()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Download
-        </button>
-      </div>
-      <div *ngIf="showSaveTextbox" class="mt-2 flex flex-col items-center">
-        <label for="fileName" class="block text-sm font-medium text-gray-700">Enter File Name</label>
-        <input id="fileName" [(ngModel)]="fileName" class="mt-1 block w-1/4 pl-1 pr-8 py-1 text-sm border border-gray-400 bg-gray-100 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md" />
-        <button (click)="saveResume()" class="mt-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-          Confirm Save
-        </button>
-      </div>
-    </div>
-  </div>
+<div class="min-h-screen bg-slate-50 dark:bg-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <!-- Controls -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800">
+                        <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Configure</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Choose the source profile and visual template.</p>
+                    </div>
+                    <div class="px-6 py-5 space-y-5">
+                        <!-- Profile select -->
+                        <div>
+                            <label for="profileDropdown" class="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">
+                                Profile <span class="text-red-500">*</span>
+                            </label>
+                            <select id="profileDropdown"
+                                [(ngModel)]="selectedProfileId" (change)="onProfileChange()"
+                                [disabled]="profilesLoading"
+                                class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 transition-shadow disabled:opacity-60 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="" disabled>
+                                    <ng-container *ngIf="profilesLoading">Loading profiles…</ng-container>
+                                    <ng-container *ngIf="!profilesLoading && profiles.length === 0">No profiles — create one first</ng-container>
+                                    <ng-container *ngIf="!profilesLoading && profiles.length > 0">Select a profile</ng-container>
+                                </option>
+                                <option *ngFor="let profile of profiles" [value]="profile.id">{{ profile.profile_name }}</option>
+                            </select>
+                            <p *ngIf="!profilesLoading && profiles.length === 0" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                                Head to <a routerLink="/profiles" class="text-blue-600 hover:underline">Profiles</a> to create one.
+                            </p>
+                        </div>
 
-  <!-- Loading Modal -->
-  <div *ngIf="isLoading" class="fixed inset-0 flex items-center justify-center bg-opacity-75 z-50">
-    <div class="bg-white p-6 rounded-lg shadow-lg">
-      <div class="flex items-center space-x-2">
-        <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-        </svg>
-        <span>Running on free compute, begging the cloud gods for mercy... 20 seconds, please!...</span>
-      </div>
+                        <!-- Template select -->
+                        <div>
+                            <label for="templateDropdown" class="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">
+                                Template <span class="text-red-500">*</span>
+                            </label>
+                            <select id="templateDropdown"
+                                [(ngModel)]="selectedTemplateId" (change)="onTemplateChange()"
+                                [disabled]="templatesLoading"
+                                class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 transition-shadow disabled:opacity-60 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="" disabled>
+                                    <ng-container *ngIf="templatesLoading">Loading templates…</ng-container>
+                                    <ng-container *ngIf="!templatesLoading">Select a template</ng-container>
+                                </option>
+                                <option *ngFor="let template of templates" [value]="template.id">{{ template.name }}</option>
+                            </select>
+                            <p *ngIf="!isGenerated && selectedTemplateId" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                                Preview of this template is shown on the right.
+                            </p>
+                        </div>
+
+                        <!-- Error -->
+                        <div *ngIf="errorMessage" class="flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800">
+                            <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 5c-.77-1.33-2.69-1.33-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z" />
+                            </svg>
+                            <span>{{ errorMessage }}</span>
+                        </div>
+
+                        <!-- Generate button -->
+                        <button (click)="generateResume()" [disabled]="!canGenerate"
+                            class="w-full inline-flex justify-center items-center gap-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg px-5 py-2.5 shadow-sm transition-colors">
+                            <svg *ngIf="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.847.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+                            </svg>
+                            <svg *ngIf="isLoading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                            {{ isLoading ? 'Generating…' : 'Generate resume' }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Post-generation actions -->
+                <div *ngIf="isGenerated" class="bg-white dark:bg-gray-800 shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Ready</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Save it to your library or download the PDF.</p>
+                    </div>
+                    <div class="px-6 py-5 space-y-3">
+                        <div *ngIf="!showSaveTextbox" class="flex gap-2">
+                            <button (click)="toggleSaveTextbox()"
+                                class="flex-1 inline-flex justify-center items-center gap-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg px-4 py-2.5 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5zm4 0v4h6V5" />
+                                </svg>
+                                Save
+                            </button>
+                            <button (click)="downloadResume()"
+                                class="flex-1 inline-flex justify-center items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg px-4 py-2.5 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                                </svg>
+                                Download
+                            </button>
+                        </div>
+                        <div *ngIf="showSaveTextbox" class="space-y-3">
+                            <div>
+                                <label for="fileName" class="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">File name</label>
+                                <input id="fileName" type="text" [(ngModel)]="fileName" placeholder="My resume"
+                                    class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 transition-shadow dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                            </div>
+                            <div class="flex gap-2">
+                                <button (click)="toggleSaveTextbox()" [disabled]="isSaving"
+                                    class="flex-1 inline-flex justify-center items-center text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 rounded-lg px-4 py-2.5 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700">
+                                    Cancel
+                                </button>
+                                <button (click)="saveResume()" [disabled]="isSaving || !fileName.trim()"
+                                    class="flex-1 inline-flex justify-center items-center gap-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed rounded-lg px-4 py-2.5 transition-colors">
+                                    <svg *ngIf="isSaving" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                    </svg>
+                                    {{ isSaving ? 'Saving…' : 'Confirm save' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="lg:col-span-3">
+                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="flex h-2 w-2 rounded-full" [class.bg-green-500]="isGenerated" [class.bg-gray-300]="!isGenerated"></span>
+                            <h2 class="text-sm font-semibold text-gray-900 dark:text-white">
+                                {{ isGenerated ? 'Your resume' : 'Template preview' }}
+                            </h2>
+                        </div>
+                        <span *ngIf="isGenerated" class="text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-full px-2.5 py-0.5 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800">
+                            Generated
+                        </span>
+                    </div>
+                    <div class="bg-gray-100 dark:bg-gray-900 h-[calc(100vh-14rem)] min-h-[500px]">
+                        <pdf-viewer *ngIf="selectedResumeUrl" [src]="selectedResumeUrl" [rotation]="0"
+                            [original-size]="false"
+                            [show-all]="true"
+                            [fit-to-page]="false"
+                            [zoom]="1"
+                            [zoom-scale]="'page-height'"
+                            [stick-to-page]="false"
+                            [render-text]="true"
+                            [external-link-target]="'blank'"
+                            [autoresize]="true"
+                            [show-borders]="true"
+                            style="width: 100%; height: 100%;"></pdf-viewer>
+                        <div *ngIf="!selectedResumeUrl" class="h-full flex flex-col items-center justify-center px-6 text-center">
+                            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700">
+                                <svg class="h-7 w-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                </svg>
+                            </div>
+                            <h3 class="mt-4 text-base font-semibold text-gray-900 dark:text-white">Nothing to preview</h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-xs">Pick a template to see a sample.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
+</div>
+
+<!-- Loading overlay (generation) -->
+<div *ngIf="isLoading" class="fixed inset-0 z-50 flex items-center justify-center px-4">
+    <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
+    <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 px-6 py-5 max-w-sm w-full">
+        <div class="flex items-center gap-3">
+            <svg class="animate-spin h-5 w-5 text-blue-600 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <div>
+                <div class="text-sm font-semibold text-gray-900 dark:text-white">Generating your resume…</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Running on free compute — this can take up to 20 seconds.</div>
+            </div>
+        </div>
+    </div>
 </div>

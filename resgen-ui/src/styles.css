@@ -4,3 +4,7 @@
 @source "../node_modules/flowbite";
 @custom-variant dark (&:where(.dark, .dark *));
 @source "../node_modules/flowbite-datepicker";
+
+html, body {
+  background-color: rgb(248 250 252); /* slate-50 */
+}

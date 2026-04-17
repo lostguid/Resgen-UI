@@ -1,180 +1,172 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Flowbite } from '../../../flowbite-decorator';
 import { HttpClient } from '@angular/common/http';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { environment } from '../../../environments/environment';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TabService } from '../../services/tab.service';
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, PdfViewerModule, FormsModule ],
+  imports: [CommonModule, PdfViewerModule, FormsModule, RouterLink],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
 
 @Flowbite()
-export class HomeComponent implements AfterViewInit {
-  isLoading: boolean = false;
-  token: string | null = null;
-  isLoggedIn: boolean = false;
-  isAuthenticated: boolean = false;
-  showSaveAndDownloadButtons: boolean = false;
+export class HomeComponent {
+  isLoading = false;
+  isSaving = false;
+  isGenerated = false;
+  profilesLoading = true;
+  templatesLoading = true;
+  errorMessage = '';
 
   profiles: any[] = [];
   templates: any[] = [];
-  selectedResumeUrl: string = '';
+  selectedProfileId = '';
+  selectedTemplateId = '';
+  selectedResumeUrl = '';
+
   showSaveTextbox = false;
-  fileName: string = '';
-  //selectedResumeUrl: string = 'https://storageresgen.blob.core.windows.net/resgen-assets/resume_example2.pdf';
+  fileName = '';
 
   constructor(private http: HttpClient, private router: Router, private tabService: TabService) {}
 
   ngOnInit(): void {
     this.loadProfiles();
     this.loadTemplates();
-    this.viewResume('');
-  }
-
-  ngAfterViewInit(): void {
-    const templateDropdown = document.getElementById('templateDropdown') as HTMLSelectElement;
-    if (templateDropdown) {
-      templateDropdown.addEventListener('change', (event) => {
-        const selectedTemplateId = (event.target as HTMLSelectElement).value;
-        const selectedTemplate = this.templates.find(template => template.id === selectedTemplateId);
-        if (selectedTemplate) {
-          this.viewResume(selectedTemplate.template_sample_url);
-        }
-        // Reset the Save and Download buttons visibility
-      this.showSaveAndDownloadButtons = false;
-      });
-    }
   }
 
   loadProfiles(): void {
-    this.http.get<any[]>(`${environment.apiUrl}/profile/user/` + localStorage.getItem('user.id')).subscribe(data => {
-      this.profiles = data;
-      this.populateDropdown('profileDropdown', this.profiles);
-    });
-  }
-
-  loadTemplates(): void {
-    this.http.get<any[]>(`${environment.apiUrl}/Template`).subscribe(data => {
-      this.templates = data;
-      this.populateDropdown('templateDropdown', this.templates);
-      if (this.templates.length > 0) {
-        this.viewResume(this.templates[0].template_sample_url);
+    this.profilesLoading = true;
+    this.http.get<any[]>(`${environment.apiUrl}/profile/user/` + localStorage.getItem('user.id')).subscribe({
+      next: data => {
+        this.profiles = data || [];
+        this.profilesLoading = false;
+      },
+      error: () => {
+        this.profiles = [];
+        this.profilesLoading = false;
       }
     });
   }
 
-  populateDropdown(dropdownId: string, items: any[]): void {
-    const dropdown = document.getElementById(dropdownId) as HTMLSelectElement;
-    dropdown.innerHTML = '';
-    if(dropdownId === 'profileDropdown') {
-      items.forEach(item => {
-        const option = document.createElement('option');
-        option.value = item.id;
-        option.text = item.profile_name;
-        dropdown.add(option);
-      });
-    }
-    else if(dropdownId === 'templateDropdown') {
-      items.forEach(item => {
-        const option = document.createElement('option');
-        option.value = item.id;
-        option.text = item.name;
-        dropdown.add(option);
-      });
-    }
+  loadTemplates(): void {
+    this.templatesLoading = true;
+    this.http.get<any[]>(`${environment.apiUrl}/Template`).subscribe({
+      next: data => {
+        this.templates = data || [];
+        this.templatesLoading = false;
+        if (this.templates.length > 0) {
+          this.selectedTemplateId = this.templates[0].id;
+          this.selectedResumeUrl = this.templates[0].template_sample_url;
+        }
+      },
+      error: () => {
+        this.templates = [];
+        this.templatesLoading = false;
+      }
+    });
   }
 
-  generateResume() {
+  onTemplateChange(): void {
+    const selectedTemplate = this.templates.find(t => t.id === this.selectedTemplateId);
+    if (selectedTemplate) {
+      this.selectedResumeUrl = selectedTemplate.template_sample_url;
+    }
+    this.isGenerated = false;
+    this.showSaveTextbox = false;
+  }
+
+  onProfileChange(): void {
+    this.isGenerated = false;
+    this.showSaveTextbox = false;
+  }
+
+  get canGenerate(): boolean {
+    return !!this.selectedProfileId && !!this.selectedTemplateId && !this.isLoading;
+  }
+
+  generateResume(): void {
+    if (!this.canGenerate) return;
     this.isLoading = true;
+    this.isGenerated = false;
     this.showSaveTextbox = false;
     this.fileName = '';
-    const profileId = (document.getElementById('profileDropdown') as HTMLSelectElement).value;
-    const templateId = (document.getElementById('templateDropdown') as HTMLSelectElement).value;
+    this.errorMessage = '';
 
-    if (profileId && templateId) {
-      this.http.get(`${environment.apiUrl}/Resume/generate-resume?profileId=${profileId}&templateId=${templateId}&userId=${localStorage.getItem('user.id')}`, { responseType: 'blob' })
-        .subscribe(response => {
+    this.http.get(`${environment.apiUrl}/Resume/generate-resume?profileId=${this.selectedProfileId}&templateId=${this.selectedTemplateId}&userId=${localStorage.getItem('user.id')}`, { responseType: 'blob' })
+      .subscribe({
+        next: response => {
           this.isLoading = false;
-          this.showSaveAndDownloadButtons = true;
-          const url = window.URL.createObjectURL(response);
-          this.selectedResumeUrl = url;
-        }, error => {
+          this.isGenerated = true;
+          this.selectedResumeUrl = window.URL.createObjectURL(response);
+        },
+        error: () => {
           this.isLoading = false;
-          console.error('Error fetching the resume:', error);
-        });
-    } else {
-      alert('Please select both profile and template.');
-    }
+          this.errorMessage = 'Could not generate the resume. Please try again.';
+        }
+      });
   }
 
-  saveResume() {
-    const profileId = (document.getElementById('profileDropdown') as HTMLSelectElement).value;
-    const templateId = (document.getElementById('templateDropdown') as HTMLSelectElement).value;
-  
-    if (this.selectedResumeUrl) {
-      this.isLoading = true;
-      fetch(this.selectedResumeUrl)
-        .then(response => response.blob())
-        .then(blob => {
-          const reader = new FileReader();
-          reader.readAsArrayBuffer(blob);
-          reader.onloadend = () => {
-            const byteArray = new Uint8Array(reader.result as ArrayBuffer);
-            const base64String = btoa(String.fromCharCode(...byteArray));
-            this.http.post(`${environment.apiUrl}/Resume`, {
-              name: this.fileName,
-              user_id: localStorage.getItem('user.id'),
-              resume_blob_byte_array: base64String,
-              created_at: new Date().toISOString(),
-              profile_id: profileId,
-              template_id: templateId
-            }).subscribe(response => {
-              this.isLoading = false;
-              //('Resume saved successfully!');
+  saveResume(): void {
+    if (!this.selectedResumeUrl || !this.fileName.trim()) return;
+    this.isSaving = true;
+    fetch(this.selectedResumeUrl)
+      .then(response => response.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.readAsArrayBuffer(blob);
+        reader.onloadend = () => {
+          const byteArray = new Uint8Array(reader.result as ArrayBuffer);
+          const base64String = btoa(String.fromCharCode(...byteArray));
+          this.http.post(`${environment.apiUrl}/Resume`, {
+            name: this.fileName.trim(),
+            user_id: localStorage.getItem('user.id'),
+            resume_blob_byte_array: base64String,
+            created_at: new Date().toISOString(),
+            profile_id: this.selectedProfileId,
+            template_id: this.selectedTemplateId
+          }).subscribe({
+            next: () => {
+              this.isSaving = false;
               this.showSaveTextbox = false;
               this.tabService.setSelectedTab('resumes');
               this.router.navigate(['/resumes']);
-            }, error => {
-              this.isLoading = false;
-              this.showSaveTextbox = false;
-              //console.error('Error saving the resume:', error);
-            });
-          };
-        })
-        .catch(error => {
-          this.isLoading = false;
-          console.error('Error fetching the resume blob:', error);
-        });
-    } else {
-      alert('No resume available to save.');
-    }
+            },
+            error: () => {
+              this.isSaving = false;
+              this.errorMessage = 'Could not save the resume. Please try again.';
+            }
+          });
+        };
+      })
+      .catch(() => {
+        this.isSaving = false;
+        this.errorMessage = 'Could not read the generated resume.';
+      });
   }
 
-  toggleSaveTextbox() {
+  toggleSaveTextbox(): void {
     this.showSaveTextbox = !this.showSaveTextbox;
-  }
-
-  downloadResume() {
-    if (this.selectedResumeUrl) {
-      const link = document.createElement('a');
-      link.href = this.selectedResumeUrl;
-      link.download = 'resume.pdf';
-      link.target = '_blank'; // Open link in a new tab
-      link.click();
-    } else {
-      alert('No resume available to download.');
+    if (this.showSaveTextbox && !this.fileName) {
+      const profile = this.profiles.find(p => p.id === this.selectedProfileId);
+      const template = this.templates.find(t => t.id === this.selectedTemplateId);
+      if (profile && template) {
+        this.fileName = `${profile.profile_name} - ${template.name}`;
+      }
     }
   }
 
-  viewResume(url: string): void {
-    this.selectedResumeUrl = url;
-    //console.log('Viewing resume:', this.selectedResumeUrl);
+  downloadResume(): void {
+    if (!this.selectedResumeUrl) return;
+    const link = document.createElement('a');
+    link.href = this.selectedResumeUrl;
+    link.download = (this.fileName.trim() || 'resume') + '.pdf';
+    link.target = '_blank';
+    link.click();
   }
 }
