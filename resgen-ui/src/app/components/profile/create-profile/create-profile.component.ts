@@ -32,7 +32,8 @@ export class CreateProfileComponent implements AfterViewInit {
       linkedin: ['https://www.linkedin.com/in/', [Validators.required, Validators.pattern('^(https?:\/\/)?(www\.)?linkedin\.com\/.*$')]],
       school: ['', Validators.required],
       loe: ['', Validators.required],
-      experiences: this.fb.array([this.createExperienceFormGroup()])
+      experiences: this.fb.array([this.createExperienceFormGroup()]),
+      certifications: this.fb.array([])
     });
     //this.initializeDatepickers()
   }
@@ -121,6 +122,34 @@ export class CreateProfileComponent implements AfterViewInit {
     this.experiences.removeAt(index);
   }
 
+  createCertificationFormGroup(): FormGroup {
+    return this.fb.group({
+      name: ['', Validators.required],
+      issuingOrg: [''],
+      dateAcquired: ['']
+    });
+  }
+
+  get certifications() {
+    return this.form.get('certifications') as FormArray;
+  }
+
+  addCertification() {
+    this.certifications.push(this.createCertificationFormGroup());
+  }
+
+  removeCertification(index: number) {
+    this.certifications.removeAt(index);
+  }
+
+  getCertificationErrorMessage(index: number, controlName: string): string {
+    const control = this.certifications.at(index)?.get(controlName);
+    if (control?.hasError('required')) {
+      return 'Field cannot be empty';
+    }
+    return 'Invalid Input';
+  }
+
   getErrorMessage(controlName: string): string {
     const control = this.form.get(controlName);
     if (control?.hasError('required')) {
@@ -169,7 +198,14 @@ export class CreateProfileComponent implements AfterViewInit {
           start_date_in_utc: exp.startDate,
           end_date_in_utc: exp.endDate,
           skills_used: exp.skillsUsed.split(',').map((skill: string) => skill.trim())
-        }))
+        })),
+        certifications: (formValue.certifications ?? [])
+          .filter((c: any) => c?.name?.trim())
+          .map((c: any) => ({
+            name: c.name.trim(),
+            issuing_org: (c.issuingOrg ?? '').trim(),
+            date_acquired: (c.dateAcquired ?? '').trim()
+          }))
       };
 
       this.http.post(`${environment.apiUrl}/profile`, formattedData).subscribe(

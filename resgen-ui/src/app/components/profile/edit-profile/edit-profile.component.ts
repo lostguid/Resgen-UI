@@ -40,7 +40,8 @@ export class EditProfileComponent implements OnInit {
       linkedin: ['', [Validators.required, Validators.pattern('^(https?:\/\/)?(www\.)?linkedin\.com\/.*$')]],
       school: ['', Validators.required],
       loe: ['', Validators.required],
-      experiences: this.fb.array([])
+      experiences: this.fb.array([]),
+      certifications: this.fb.array([])
     });
     this.profileId = this.route.snapshot.paramMap.get('id') || '';
   }
@@ -67,6 +68,7 @@ export class EditProfileComponent implements OnInit {
         loe: data.level_of_education
       });
       this.setExperiences(data.experiences);
+      this.setCertifications(data.certifications ?? []);
     });
   }
 
@@ -75,6 +77,11 @@ export class EditProfileComponent implements OnInit {
     const experienceFormArray = this.fb.array(experienceFormGroups);
     this.editForm.setControl('experiences', experienceFormArray);
     this.initializeDatepickers();
+  }
+
+  setCertifications(certifications: any[]) {
+    const certFormGroups = certifications.map(c => this.createCertificationFormGroup(c));
+    this.editForm.setControl('certifications', this.fb.array(certFormGroups));
   }
 
   createExperienceFormGroup(exp?: any): FormGroup {
@@ -150,6 +157,34 @@ export class EditProfileComponent implements OnInit {
     this.experiences.removeAt(index);
   }
 
+  createCertificationFormGroup(cert?: any): FormGroup {
+    return this.fb.group({
+      name: [cert?.name ?? '', Validators.required],
+      issuingOrg: [cert?.issuing_org ?? ''],
+      dateAcquired: [cert?.date_acquired ?? '']
+    });
+  }
+
+  get certifications() {
+    return this.editForm.get('certifications') as FormArray;
+  }
+
+  addCertification() {
+    this.certifications.push(this.createCertificationFormGroup());
+  }
+
+  removeCertification(index: number) {
+    this.certifications.removeAt(index);
+  }
+
+  getCertificationErrorMessage(index: number, controlName: string): string {
+    const control = this.certifications.at(index)?.get(controlName);
+    if (control?.hasError('required')) {
+      return 'Field cannot be empty';
+    }
+    return 'Invalid Input';
+  }
+
   getErrorMessage(controlName: string): string {
     const control = this.editForm.get(controlName);
     if (control?.hasError('required')) {
@@ -198,7 +233,14 @@ export class EditProfileComponent implements OnInit {
           start_date_in_utc: exp.startDate,
           end_date_in_utc: exp.endDate,
           skills_used: exp.skillsUsed.split(',').map((skill: string) => skill.trim())
-        }))
+        })),
+        certifications: (formValue.certifications ?? [])
+          .filter((c: any) => c?.name?.trim())
+          .map((c: any) => ({
+            name: c.name.trim(),
+            issuing_org: (c.issuingOrg ?? '').trim(),
+            date_acquired: (c.dateAcquired ?? '').trim()
+          }))
       };
 
       this.http.put(`${environment.apiUrl}/profile/${this.profileId}`, formattedData).subscribe(
