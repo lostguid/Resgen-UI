@@ -194,7 +194,7 @@ export class EditProfileComponent implements OnInit {
 
   createLeadershipFormGroup(item?: any): FormGroup {
     return this.fb.group({
-      role: [item?.role ?? '', Validators.required],
+      role: [item?.role ?? ''],
       organization: [item?.organization ?? ''],
       dateRange: [item?.date_range ?? '']
     });

@@ -315,11 +315,10 @@
                             </div>
                             <div class="grid gap-4 md:grid-cols-2">
                                 <div class="md:col-span-2">
-                                    <label [for]="'leadRole' + i" class="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">Role <span class="text-red-500">*</span></label>
+                                    <label [for]="'leadRole' + i" class="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">Role</label>
                                     <input [formControlName]="'role'" [id]="'leadRole' + i" type="text"
                                         class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 transition-shadow dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                                         placeholder="President" />
-                                    <div *ngIf="item.get('role')?.touched && item.get('role')?.invalid" class="mt-1 text-red-500 text-xs">{{ getLeadershipErrorMessage(i, 'role') }}</div>
                                 </div>
                                 <div>
                                     <label [for]="'leadOrg' + i" class="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">Organization</label>

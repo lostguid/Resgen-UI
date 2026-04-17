@@ -153,7 +153,7 @@ export class CreateProfileComponent implements AfterViewInit {
 
   createLeadershipFormGroup(): FormGroup {
     return this.fb.group({
-      role: ['', Validators.required],
+      role: [''],
       organization: [''],
       dateRange: ['']
     });
