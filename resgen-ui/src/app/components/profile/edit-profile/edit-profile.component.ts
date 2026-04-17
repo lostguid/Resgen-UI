@@ -41,7 +41,8 @@ export class EditProfileComponent implements OnInit {
       school: ['', Validators.required],
       loe: ['', Validators.required],
       experiences: this.fb.array([]),
-      certifications: this.fb.array([])
+      certifications: this.fb.array([]),
+      leadership: this.fb.array([])
     });
     this.profileId = this.route.snapshot.paramMap.get('id') || '';
   }
@@ -69,6 +70,7 @@ export class EditProfileComponent implements OnInit {
       });
       this.setExperiences(data.experiences);
       this.setCertifications(data.certifications ?? []);
+      this.setLeadership(data.leadership ?? []);
     });
   }
 
@@ -82,6 +84,11 @@ export class EditProfileComponent implements OnInit {
   setCertifications(certifications: any[]) {
     const certFormGroups = certifications.map(c => this.createCertificationFormGroup(c));
     this.editForm.setControl('certifications', this.fb.array(certFormGroups));
+  }
+
+  setLeadership(leadership: any[]) {
+    const leadershipFormGroups = leadership.map(l => this.createLeadershipFormGroup(l));
+    this.editForm.setControl('leadership', this.fb.array(leadershipFormGroups));
   }
 
   createExperienceFormGroup(exp?: any): FormGroup {
@@ -185,6 +192,34 @@ export class EditProfileComponent implements OnInit {
     return 'Invalid Input';
   }
 
+  createLeadershipFormGroup(item?: any): FormGroup {
+    return this.fb.group({
+      role: [item?.role ?? '', Validators.required],
+      organization: [item?.organization ?? ''],
+      dateRange: [item?.date_range ?? '']
+    });
+  }
+
+  get leadership() {
+    return this.editForm.get('leadership') as FormArray;
+  }
+
+  addLeadership() {
+    this.leadership.push(this.createLeadershipFormGroup());
+  }
+
+  removeLeadership(index: number) {
+    this.leadership.removeAt(index);
+  }
+
+  getLeadershipErrorMessage(index: number, controlName: string): string {
+    const control = this.leadership.at(index)?.get(controlName);
+    if (control?.hasError('required')) {
+      return 'Field cannot be empty';
+    }
+    return 'Invalid Input';
+  }
+
   getErrorMessage(controlName: string): string {
     const control = this.editForm.get(controlName);
     if (control?.hasError('required')) {
@@ -240,6 +275,13 @@ export class EditProfileComponent implements OnInit {
             name: c.name.trim(),
             issuing_org: (c.issuingOrg ?? '').trim(),
             date_acquired: (c.dateAcquired ?? '').trim()
+          })),
+        leadership: (formValue.leadership ?? [])
+          .filter((l: any) => l?.role?.trim())
+          .map((l: any) => ({
+            role: l.role.trim(),
+            organization: (l.organization ?? '').trim(),
+            date_range: (l.dateRange ?? '').trim()
           }))
       };
 

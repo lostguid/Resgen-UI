@@ -33,7 +33,8 @@ export class CreateProfileComponent implements AfterViewInit {
       school: ['', Validators.required],
       loe: ['', Validators.required],
       experiences: this.fb.array([this.createExperienceFormGroup()]),
-      certifications: this.fb.array([])
+      certifications: this.fb.array([]),
+      leadership: this.fb.array([])
     });
     //this.initializeDatepickers()
   }
@@ -150,6 +151,34 @@ export class CreateProfileComponent implements AfterViewInit {
     return 'Invalid Input';
   }
 
+  createLeadershipFormGroup(): FormGroup {
+    return this.fb.group({
+      role: ['', Validators.required],
+      organization: [''],
+      dateRange: ['']
+    });
+  }
+
+  get leadership() {
+    return this.form.get('leadership') as FormArray;
+  }
+
+  addLeadership() {
+    this.leadership.push(this.createLeadershipFormGroup());
+  }
+
+  removeLeadership(index: number) {
+    this.leadership.removeAt(index);
+  }
+
+  getLeadershipErrorMessage(index: number, controlName: string): string {
+    const control = this.leadership.at(index)?.get(controlName);
+    if (control?.hasError('required')) {
+      return 'Field cannot be empty';
+    }
+    return 'Invalid Input';
+  }
+
   getErrorMessage(controlName: string): string {
     const control = this.form.get(controlName);
     if (control?.hasError('required')) {
@@ -205,6 +234,13 @@ export class CreateProfileComponent implements AfterViewInit {
             name: c.name.trim(),
             issuing_org: (c.issuingOrg ?? '').trim(),
             date_acquired: (c.dateAcquired ?? '').trim()
+          })),
+        leadership: (formValue.leadership ?? [])
+          .filter((l: any) => l?.role?.trim())
+          .map((l: any) => ({
+            role: l.role.trim(),
+            organization: (l.organization ?? '').trim(),
+            date_range: (l.dateRange ?? '').trim()
           }))
       };
 
