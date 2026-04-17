@@ -22,6 +22,9 @@ export class ResumeComponent implements OnInit {
   resumeToDelete: any = null;
   isDeleting = false;
 
+  pageSize = 8;
+  currentPage = 1;
+
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
@@ -33,13 +36,46 @@ export class ResumeComponent implements OnInit {
     this.http.get<any[]>(`${environment.apiUrl}/Resume/user/`+localStorage.getItem('user.id')).subscribe({
       next: data => {
         this.resumes = data || [];
+        this.currentPage = 1;
         this.isLoading = false;
       },
       error: () => {
         this.resumes = [];
+        this.currentPage = 1;
         this.isLoading = false;
       }
     });
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.resumes.length / this.pageSize));
+  }
+
+  get pagedResumes(): any[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.resumes.slice(start, start + this.pageSize);
+  }
+
+  get pageStartIndex(): number {
+    if (this.resumes.length === 0) return 0;
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get pageEndIndex(): number {
+    return Math.min(this.currentPage * this.pageSize, this.resumes.length);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+  }
+
+  nextPage(): void {
+    this.goToPage(this.currentPage + 1);
+  }
+
+  prevPage(): void {
+    this.goToPage(this.currentPage - 1);
   }
 
   viewResume(resume: any): void {
@@ -76,6 +112,7 @@ export class ResumeComponent implements OnInit {
     this.http.delete(`${environment.apiUrl}/Resume/${id}`).subscribe({
       next: () => {
         this.resumes = this.resumes.filter(resume => resume.id !== id);
+        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
         if (this.selectedResumeId === id) {
           this.selectedResumeUrl = null;
           this.selectedResumeId = null;

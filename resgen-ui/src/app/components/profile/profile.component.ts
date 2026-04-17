@@ -27,6 +27,9 @@ export class ProfileComponent implements OnInit {
   modalClass = '';
   modalIcon = '';
 
+  pageSize = 10;
+  currentPage = 1;
+
   constructor(private fb: FormBuilder, public router: Router, private http: HttpClient) {
     this.editForm = this.fb.group({
       name: ['', Validators.required]
@@ -42,13 +45,46 @@ export class ProfileComponent implements OnInit {
     this.http.get<any[]>(`${environment.apiUrl}/profile/user/` + localStorage.getItem('user.id')).subscribe({
       next: data => {
         this.profiles = data || [];
+        this.currentPage = 1;
         this.isLoading = false;
       },
       error: () => {
         this.profiles = [];
+        this.currentPage = 1;
         this.isLoading = false;
       }
     });
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.profiles.length / this.pageSize));
+  }
+
+  get pagedProfiles(): any[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.profiles.slice(start, start + this.pageSize);
+  }
+
+  get pageStartIndex(): number {
+    if (this.profiles.length === 0) return 0;
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get pageEndIndex(): number {
+    return Math.min(this.currentPage * this.pageSize, this.profiles.length);
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+  }
+
+  nextPage() {
+    this.goToPage(this.currentPage + 1);
+  }
+
+  prevPage() {
+    this.goToPage(this.currentPage - 1);
   }
 
   getInitials(profile: any): string {
@@ -82,6 +118,7 @@ export class ProfileComponent implements OnInit {
     this.http.delete(`${environment.apiUrl}/profile/${id}`).subscribe(
       () => {
         this.profiles = this.profiles.filter((profile: any) => profile.id !== id);
+        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
         this.isDeleting = false;
         this.showDeleteModal = false;
         this.profileToDelete = null;
