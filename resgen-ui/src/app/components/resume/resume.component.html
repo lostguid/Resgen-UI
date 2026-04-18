@@ -42,6 +42,15 @@
                         </p>
                     </div>
 
+                    <!-- Column headers -->
+                    <div *ngIf="!isLoading && resumes.length > 0"
+                        class="hidden sm:flex items-center gap-3 px-5 py-2.5 bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200 dark:border-gray-700 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        <div class="flex-shrink-0 w-10"></div>
+                        <div class="min-w-0 flex-1">Name</div>
+                        <div class="flex-shrink-0 w-24">Date</div>
+                        <div>Actions</div>
+                    </div>
+
                     <!-- List -->
                     <ul *ngIf="!isLoading && resumes.length > 0" class="divide-y divide-gray-200 dark:divide-gray-700">
                         <li *ngFor="let resume of pagedResumes"
@@ -61,7 +70,10 @@
                             </div>
                             <div class="min-w-0 flex-1">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ resume.name }}</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ resume.created_at_utc | date:'mediumDate' }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 sm:hidden">{{ resume.created_at_utc | date:'mediumDate' }}</div>
+                            </div>
+                            <div class="hidden sm:block flex-shrink-0 w-24 text-xs text-gray-500 dark:text-gray-400">
+                                {{ resume.created_at_utc | date:'mediumDate' }}
                             </div>
                             <div class="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                                 [class.!opacity-100]="resume.id === selectedResumeId">

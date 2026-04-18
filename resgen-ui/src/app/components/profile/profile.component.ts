@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -11,7 +11,7 @@ import { Flowbite } from '../../../flowbite-decorator';
   selector: 'app-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css'],
-  imports: [CommonModule, ReactiveFormsModule, ModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ModalComponent],
 })
 @Flowbite()
 export class ProfileComponent implements OnInit {
@@ -22,6 +22,12 @@ export class ProfileComponent implements OnInit {
   showDeleteModal = false;
   profileToDelete: any = null;
   isDeleting = false;
+
+  showCloneModal = false;
+  cloneSourceProfile: any = null;
+  cloneNewName = '';
+  isCloning = false;
+  cloneError: string | null = null;
   modalTitle = '';
   modalMessage = '';
   modalClass = '';
@@ -139,6 +145,62 @@ export class ProfileComponent implements OnInit {
 
   addProfile() {
     this.router.navigate(['/profiles/create']);
+  }
+
+  askCloneProfile(profile: any) {
+    this.cloneSourceProfile = profile;
+    this.cloneNewName = `${profile?.profile_name ?? 'Profile'} (Copy)`;
+    this.cloneError = null;
+    this.showCloneModal = true;
+  }
+
+  cancelClone() {
+    if (this.isCloning) return;
+    this.showCloneModal = false;
+    this.cloneSourceProfile = null;
+    this.cloneNewName = '';
+    this.cloneError = null;
+  }
+
+  confirmClone() {
+    const newName = this.cloneNewName.trim();
+    if (!this.cloneSourceProfile || !newName || this.isCloning) return;
+
+    this.isCloning = true;
+    this.cloneError = null;
+
+    this.http.get<any>(`${environment.apiUrl}/profile/${this.cloneSourceProfile.id}`).subscribe({
+      next: source => {
+        const payload = {
+          ...(source || {}),
+          id: '0',
+          profile_name: newName,
+          user_id: localStorage.getItem('user.id'),
+          created_at_in_utc: new Date().toISOString()
+        };
+
+        this.http.post(`${environment.apiUrl}/profile`, payload).subscribe({
+          next: () => {
+            this.isCloning = false;
+            this.showCloneModal = false;
+            this.cloneSourceProfile = null;
+            this.cloneNewName = '';
+            this.loadProfiles();
+            this.showModal = true;
+            this.modalTitle = 'Success';
+            this.modalMessage = 'Profile cloned successfully';
+          },
+          error: () => {
+            this.isCloning = false;
+            this.cloneError = 'Could not clone the profile. Please try again.';
+          }
+        });
+      },
+      error: () => {
+        this.isCloning = false;
+        this.cloneError = 'Could not load the source profile.';
+      }
+    });
   }
 
   onModalClose() {

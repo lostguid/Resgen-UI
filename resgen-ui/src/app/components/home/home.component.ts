@@ -33,6 +33,13 @@ export class HomeComponent {
   showSaveTextbox = false;
   fileName = '';
 
+  advancedOpen = false;
+  jobDescription = '';
+  tailorStrength = 5;
+
+  showMismatchModal = false;
+  mismatchReason = '';
+
   constructor(private http: HttpClient, private router: Router, private tabService: TabService) {}
 
   ngOnInit(): void {
@@ -90,6 +97,19 @@ export class HomeComponent {
     return !!this.selectedProfileId && !!this.selectedTemplateId && !this.isLoading;
   }
 
+  get isAdvancedActive(): boolean {
+    return this.advancedOpen && this.jobDescription.trim().length > 0;
+  }
+
+  toggleAdvanced(): void {
+    this.advancedOpen = !this.advancedOpen;
+  }
+
+  closeMismatchModal(): void {
+    this.showMismatchModal = false;
+    this.mismatchReason = '';
+  }
+
   generateResume(): void {
     if (!this.canGenerate) return;
     this.isLoading = true;
@@ -98,6 +118,14 @@ export class HomeComponent {
     this.fileName = '';
     this.errorMessage = '';
 
+    if (this.isAdvancedActive) {
+      this.generateTailored();
+    } else {
+      this.generateStandard();
+    }
+  }
+
+  private generateStandard(): void {
     this.http.get(`${environment.apiUrl}/Resume/generate-resume?profileId=${this.selectedProfileId}&templateId=${this.selectedTemplateId}&userId=${localStorage.getItem('user.id')}`, { responseType: 'blob' })
       .subscribe({
         next: response => {
@@ -108,6 +136,40 @@ export class HomeComponent {
         error: () => {
           this.isLoading = false;
           this.errorMessage = 'Could not generate the resume. Please try again.';
+        }
+      });
+  }
+
+  private generateTailored(): void {
+    const body = {
+      userId: localStorage.getItem('user.id'),
+      profileId: this.selectedProfileId,
+      templateId: this.selectedTemplateId,
+      jobDescription: this.jobDescription.trim(),
+      tailorStrength: this.tailorStrength
+    };
+
+    this.http.post(`${environment.apiUrl}/Resume/generate-tailored`, body, { responseType: 'blob' })
+      .subscribe({
+        next: response => {
+          this.isLoading = false;
+          this.isGenerated = true;
+          this.selectedResumeUrl = window.URL.createObjectURL(response);
+        },
+        error: async err => {
+          this.isLoading = false;
+          if (err.status === 422 && err.error instanceof Blob) {
+            try {
+              const text = await err.error.text();
+              const parsed = JSON.parse(text);
+              this.mismatchReason = parsed?.reason || '';
+              this.showMismatchModal = true;
+              return;
+            } catch {
+              // fall through to generic error
+            }
+          }
+          this.errorMessage = 'Could not generate the tailored resume. Please try again.';
         }
       });
   }

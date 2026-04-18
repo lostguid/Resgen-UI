@@ -35,7 +35,9 @@ export class ResumeComponent implements OnInit {
     this.isLoading = true;
     this.http.get<any[]>(`${environment.apiUrl}/Resume/user/`+localStorage.getItem('user.id')).subscribe({
       next: data => {
-        this.resumes = data || [];
+        this.resumes = (data || []).slice().sort((a, b) =>
+          new Date(b.created_at_utc).getTime() - new Date(a.created_at_utc).getTime()
+        );
         this.currentPage = 1;
         this.isLoading = false;
       },
