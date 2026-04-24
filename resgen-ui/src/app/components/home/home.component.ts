@@ -33,9 +33,11 @@ export class HomeComponent {
   profiles: any[] = [];
   profilesTotal = 0;
   templates: any[] = [];
+  models: { id: string; display_name: string; provider: string; default: boolean }[] = [];
   selectedProfileId = '';
   selectedProfile: any = null;
   selectedTemplateId = '';
+  selectedModelId = '';
   selectedResumeUrl = '';
 
   // Combobox state (used when profilesTotal > 5)
@@ -61,6 +63,7 @@ export class HomeComponent {
   ngOnInit(): void {
     this.loadProfiles();
     this.loadTemplates();
+    this.loadModels();
     this.loadVerificationStatus();
 
     this.profileSearchSubject.pipe(
@@ -156,6 +159,21 @@ export class HomeComponent {
     this.onProfileChange();
   }
 
+  loadModels(): void {
+    this.http.get<{ models: any[]; default: string }>(`${environment.apiUrl}/Models`).subscribe({
+      next: res => {
+        this.models = res?.models || [];
+        if (!this.selectedModelId) {
+          this.selectedModelId = res?.default || this.models[0]?.id || 'gpt-4o';
+        }
+      },
+      error: () => {
+        this.models = [];
+        this.selectedModelId = 'gpt-4o';
+      }
+    });
+  }
+
   loadTemplates(): void {
     this.templatesLoading = true;
     this.http.get<any[]>(`${environment.apiUrl}/Template`).subscribe({
@@ -179,6 +197,11 @@ export class HomeComponent {
     if (selectedTemplate) {
       this.selectedResumeUrl = selectedTemplate.template_sample_url;
     }
+    this.isGenerated = false;
+    this.showSaveTextbox = false;
+  }
+
+  onModelChange(): void {
     this.isGenerated = false;
     this.showSaveTextbox = false;
   }
@@ -228,7 +251,8 @@ export class HomeComponent {
   }
 
   private generateStandard(): void {
-    this.http.get(`${environment.apiUrl}/Resume/generate-resume?profileId=${this.selectedProfileId}&templateId=${this.selectedTemplateId}&userId=${localStorage.getItem('user.id')}`, { responseType: 'blob' })
+    const modelParam = this.selectedModelId ? `&model=${encodeURIComponent(this.selectedModelId)}` : '';
+    this.http.get(`${environment.apiUrl}/Resume/generate-resume?profileId=${this.selectedProfileId}&templateId=${this.selectedTemplateId}&userId=${localStorage.getItem('user.id')}${modelParam}`, { responseType: 'blob' })
       .subscribe({
         next: response => {
           this.isLoading = false;
@@ -248,7 +272,8 @@ export class HomeComponent {
       profileId: this.selectedProfileId,
       templateId: this.selectedTemplateId,
       jobDescription: this.jobDescription.trim(),
-      tailorStrength: this.tailorStrength
+      tailorStrength: this.tailorStrength,
+      model: this.selectedModelId
     };
 
     this.http.post(`${environment.apiUrl}/Resume/generate-tailored`, body, { responseType: 'blob' })
