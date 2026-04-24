@@ -96,6 +96,11 @@ export class AppComponent implements OnInit {
     this.auth.login();
   }
 
+  onUserImageError(): void {
+    this.userImageUrl = null;
+    localStorage.removeItem('user.picture');
+  }
+
   get userInitials(): string {
     const source = (this.user?.name || this.user?.email || '').trim();
     if (!source) return 'U';

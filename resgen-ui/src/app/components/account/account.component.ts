@@ -34,6 +34,11 @@ export class AccountComponent {
     });
   }
 
+  onUserImageError(): void {
+    this.userImageUrl = null;
+    localStorage.removeItem('user.picture');
+  }
+
   get initials(): string {
     const source = (this.user?.name || this.user?.email || '').trim();
     if (!source) return '?';
