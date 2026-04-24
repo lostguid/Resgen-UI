@@ -96,6 +96,22 @@
                             <span>{{ errorMessage }}</span>
                         </div>
 
+                        <!-- Email verification notice -->
+                        <div *ngIf="userCheckLoaded && !isEmailVerified"
+                            class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+                            <div class="flex items-start gap-2">
+                                <svg class="w-5 h-5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 1 0-2.636 6.364M16.5 12V8.25" />
+                                </svg>
+                                <div>
+                                    <p class="font-medium">Please verify your email first</p>
+                                    <p class="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                                        We sent a verification link to your inbox when you signed up. Once you confirm it, come back here and you'll be all set to generate resumes.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Generate button -->
                         <button (click)="generateResume()" [disabled]="!canGenerate"
                             class="w-full inline-flex justify-center items-center gap-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg px-5 py-2.5 shadow-sm transition-colors">

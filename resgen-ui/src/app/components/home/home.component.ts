@@ -24,6 +24,9 @@ export class HomeComponent {
   templatesLoading = true;
   errorMessage = '';
 
+  isEmailVerified = true;
+  userCheckLoaded = false;
+
   profiles: any[] = [];
   templates: any[] = [];
   selectedProfileId = '';
@@ -45,6 +48,24 @@ export class HomeComponent {
   ngOnInit(): void {
     this.loadProfiles();
     this.loadTemplates();
+    this.loadVerificationStatus();
+  }
+
+  loadVerificationStatus(): void {
+    const userId = localStorage.getItem('user.id');
+    if (!userId) {
+      this.userCheckLoaded = true;
+      return;
+    }
+    this.http.get<any>(`${environment.apiUrl}/User/userId/${userId}`).subscribe({
+      next: user => {
+        this.isEmailVerified = !!user?.is_email_verified;
+        this.userCheckLoaded = true;
+      },
+      error: () => {
+        this.userCheckLoaded = true;
+      }
+    });
   }
 
   loadProfiles(): void {
@@ -94,7 +115,7 @@ export class HomeComponent {
   }
 
   get canGenerate(): boolean {
-    return !!this.selectedProfileId && !!this.selectedTemplateId && !this.isLoading;
+    return !!this.selectedProfileId && !!this.selectedTemplateId && !this.isLoading && this.isEmailVerified;
   }
 
   get isAdvancedActive(): boolean {
