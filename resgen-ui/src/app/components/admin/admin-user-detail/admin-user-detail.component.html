@@ -1,0 +1,181 @@
+<div class="p-4">
+  <button (click)="back()" type="button"
+          class="mb-4 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+    </svg>
+    Back to Admin
+  </button>
+
+  <div *ngIf="isLoading" class="rounded-xl bg-white p-10 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
+    <div class="flex flex-col items-center justify-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+      <svg class="w-8 h-8 text-indigo-500 animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+      </svg>
+      Loading user detail…
+    </div>
+  </div>
+
+  <div *ngIf="error && !isLoading" class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+    {{ error }}
+  </div>
+
+  <ng-container *ngIf="!isLoading && !error && user">
+    <div class="mb-4 flex items-center gap-2">
+      <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">Read-only</span>
+    </div>
+
+    <!-- User card -->
+    <div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
+      <div class="flex items-start justify-between gap-6 flex-wrap">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ user.name || '—' }}</h1>
+          <p class="text-sm text-gray-500 dark:text-gray-400 break-all">{{ user.id }}</p>
+        </div>
+        <div class="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+          <div>
+            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Email</p>
+            <p class="text-gray-900 dark:text-white">
+              {{ user.email || '—' }}
+              <span *ngIf="user.is_email_verified" class="ml-1 inline-flex items-center rounded-full bg-green-50 px-1.5 py-0.5 text-[10px] font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-300">Verified</span>
+              <span *ngIf="!user.is_email_verified" class="ml-1 inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">Unverified</span>
+            </p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Phone</p>
+            <p class="text-gray-900 dark:text-white">{{ user.phone || '—' }}</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Tokens Used</p>
+            <p class="text-gray-900 dark:text-white tabular-nums">{{ user.tokens_used | number }}</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Last Active</p>
+            <p class="text-gray-900 dark:text-white">{{ formatDate(user.last_active_in_utc) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profiles -->
+    <div class="mt-6 rounded-xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Profiles ({{ profiles.length }})</h2>
+      </div>
+      <div *ngIf="profiles.length === 0" class="px-6 py-8 text-sm text-gray-500 dark:text-gray-400">No profiles.</div>
+      <ul *ngIf="profiles.length > 0" class="divide-y divide-gray-100 dark:divide-gray-700">
+        <li *ngFor="let p of profiles">
+          <button (click)="toggleProfile(p.id)" type="button"
+                  class="w-full flex items-center justify-between px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/40 text-left">
+            <div>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ p.profile_name || '(untitled profile)' }}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ p.first_name }} {{ p.last_name }} · Created {{ formatDate(p.created_at_in_utc) }}
+              </p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 transition-transform"
+                 [class.rotate-90]="expandedProfileId === p.id"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+          <div *ngIf="expandedProfileId === p.id" class="px-6 pb-5 bg-gray-50 dark:bg-gray-900/30 text-sm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+              <div>
+                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Email</p>
+                <p class="text-gray-800 dark:text-gray-200">{{ p.email || '—' }}</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Phone</p>
+                <p class="text-gray-800 dark:text-gray-200">{{ p.phone || '—' }}</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">LinkedIn</p>
+                <p class="text-gray-800 dark:text-gray-200 break-all">{{ p.linkedin_url || '—' }}</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Education</p>
+                <p class="text-gray-800 dark:text-gray-200">{{ p.school_name || '—' }}<span *ngIf="p.level_of_education"> — {{ p.level_of_education }}</span></p>
+              </div>
+            </div>
+
+            <div class="mt-5" *ngIf="p.experiences?.length">
+              <p class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Experience</p>
+              <ul class="space-y-2">
+                <li *ngFor="let e of p.experiences" class="rounded-md border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ e.title }} · {{ e.company_name }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ e.start_date_in_utc }} – {{ e.end_date_in_utc || 'Present' }}</p>
+                  <p *ngIf="e.skills_used?.length" class="mt-1 text-xs text-gray-700 dark:text-gray-300">Skills: {{ e.skills_used.join(', ') }}</p>
+                </li>
+              </ul>
+            </div>
+
+            <div class="mt-5" *ngIf="p.certifications?.length">
+              <p class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Certifications</p>
+              <ul class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                <li *ngFor="let c of p.certifications">
+                  {{ c.name }}<span *ngIf="c.issuing_org"> — {{ c.issuing_org }}</span><span *ngIf="c.date_acquired"> ({{ c.date_acquired }})</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="mt-5" *ngIf="p.leadership?.length">
+              <p class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Leadership</p>
+              <ul class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                <li *ngFor="let l of p.leadership">
+                  {{ l.role }}<span *ngIf="l.organization"> — {{ l.organization }}</span><span *ngIf="l.date_range"> ({{ l.date_range }})</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Resumes -->
+    <div class="mt-6 rounded-xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Resumes ({{ resumes.length }})</h2>
+      </div>
+      <div *ngIf="resumes.length === 0" class="px-6 py-8 text-sm text-gray-500 dark:text-gray-400">No resumes.</div>
+      <div *ngIf="resumes.length > 0" class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-900/40">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Name</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Template</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Created</th>
+              <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            <tr *ngFor="let r of resumes" class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+              <td class="px-6 py-3 text-sm font-medium text-gray-900 dark:text-white">{{ r.name || '—' }}</td>
+              <td class="px-6 py-3 text-sm text-gray-700 dark:text-gray-300">{{ r.template_id || '—' }}</td>
+              <td class="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">{{ formatDate(r.created_at_utc) }}</td>
+              <td class="px-6 py-3 text-right">
+                <button (click)="viewResume(r)" type="button"
+                        class="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50">
+                  View
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Resume preview -->
+    <div *ngIf="selectedResumeUrl" class="mt-6 rounded-xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700 overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-3 border-b border-gray-100 dark:border-gray-700">
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Resume Preview</h3>
+        <button (click)="closeResumePreview()" type="button"
+                class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Close</button>
+      </div>
+      <div class="p-4" style="height: 80vh;">
+        <pdf-viewer [src]="selectedResumeUrl" [render-text]="true" [original-size]="false" style="display: block; height: 100%;"></pdf-viewer>
+      </div>
+    </div>
+  </ng-container>
+</div>

@@ -159,6 +159,23 @@
                             <span class="flex-1 ms-3 whitespace-nowrap">Account</span>
                         </a>
                     </li>
+                    <li *ngIf="isAdmin">
+                        <a (click)="openAdminTab()"
+                            [ngClass]="selectedTab === 'admin'
+                                ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                                : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/60'"
+                            class="relative flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer group">
+                            <span *ngIf="selectedTab === 'admin'" class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r bg-indigo-600 dark:bg-indigo-400"></span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
+                                [ngClass]="selectedTab === 'admin' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200'"
+                                stroke="currentColor" class="w-5 h-5 transition-colors">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12.75 11.25 15 15 9.75M3.75 12a8.25 8.25 0 1 1 16.5 0 8.25 8.25 0 0 1-16.5 0Z" />
+                            </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Admin</span>
+                            <span class="ms-auto inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">admin</span>
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- Footer -->

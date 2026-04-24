@@ -1,0 +1,174 @@
+<div class="p-4">
+  <div class="mb-6">
+    <div class="flex items-center gap-3">
+      <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:ring-indigo-800">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
+        Admin
+      </span>
+      <span class="text-xs text-gray-500 dark:text-gray-400">roles: {{ roles.join(', ') || 'none' }}</span>
+    </div>
+    <h1 class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+    <p class="text-sm text-gray-500 dark:text-gray-400">Manage users, profiles, resumes, and templates across the platform.</p>
+  </div>
+
+  <div *ngIf="statsError" class="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+    {{ statsError }}
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
+      <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Total Users</p>
+      <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <svg *ngIf="isLoadingStats" class="w-6 h-6 text-indigo-500 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <span *ngIf="!isLoadingStats">{{ stats?.totalUsers ?? '—' }}</span>
+      </p>
+    </div>
+    <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
+      <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Total Tokens Used</p>
+      <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <svg *ngIf="isLoadingStats" class="w-6 h-6 text-indigo-500 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <span *ngIf="!isLoadingStats">{{ (stats?.totalTokensUsed ?? 0) | number }}</span>
+      </p>
+    </div>
+    <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
+      <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Verified Emails</p>
+      <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <svg *ngIf="isLoadingUsers" class="w-6 h-6 text-indigo-500 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <span *ngIf="!isLoadingUsers">{{ verifiedCount }}</span>
+      </p>
+    </div>
+    <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
+      <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Unverified Users</p>
+      <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <svg *ngIf="isLoadingUsers" class="w-6 h-6 text-indigo-500 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <span *ngIf="!isLoadingUsers">{{ unverifiedCount }}</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-6 rounded-xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700 overflow-hidden">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Users</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          <span *ngIf="!isLoadingUsers && users.length > 0">
+            Showing {{ pageStartIndex }}–{{ pageEndIndex }} of {{ users.length }}
+          </span>
+          <span *ngIf="!isLoadingUsers && users.length === 0">No users found</span>
+          <span *ngIf="isLoadingUsers">Loading…</span>
+        </p>
+      </div>
+      <button (click)="loadUsers()" type="button"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        Refresh
+      </button>
+    </div>
+
+    <div *ngIf="usersError" class="m-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+      {{ usersError }}
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-900/40">
+          <tr>
+            <th (click)="toggleSort('name')" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200">
+              <span class="inline-flex items-center gap-1">
+                Name
+                <span *ngIf="sortColumn === 'name'" class="text-gray-400">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              </span>
+            </th>
+            <th (click)="toggleSort('email')" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200">
+              <span class="inline-flex items-center gap-1">
+                Email
+                <span *ngIf="sortColumn === 'email'" class="text-gray-400">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              </span>
+            </th>
+            <th (click)="toggleSort('is_email_verified')" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200">
+              <span class="inline-flex items-center gap-1">
+                Verified
+                <span *ngIf="sortColumn === 'is_email_verified'" class="text-gray-400">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              </span>
+            </th>
+            <th (click)="toggleSort('tokens_used')" class="px-6 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200">
+              <span class="inline-flex items-center gap-1 justify-end">
+                Tokens
+                <span *ngIf="sortColumn === 'tokens_used'" class="text-gray-400">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              </span>
+            </th>
+            <th (click)="toggleSort('last_active_in_utc')" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200">
+              <span class="inline-flex items-center gap-1">
+                Last Active
+                <span *ngIf="sortColumn === 'last_active_in_utc'" class="text-gray-400">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+          <tr *ngIf="isLoadingUsers">
+            <td colspan="5" class="px-6 py-10">
+              <div class="flex items-center justify-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                <svg class="w-5 h-5 text-indigo-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                Loading users…
+              </div>
+            </td>
+          </tr>
+          <tr *ngFor="let u of pagedUsers" (click)="openUser(u)" class="hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
+            <td class="px-6 py-3 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900 dark:text-white">{{ u.name || '—' }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[240px]">{{ u.id }}</div>
+            </td>
+            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ u.email || '—' }}</td>
+            <td class="px-6 py-3 whitespace-nowrap">
+              <span *ngIf="u.is_email_verified" class="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                Verified
+              </span>
+              <span *ngIf="!u.is_email_verified" class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                Unverified
+              </span>
+            </td>
+            <td class="px-6 py-3 whitespace-nowrap text-right text-sm tabular-nums text-gray-700 dark:text-gray-300">{{ u.tokens_used | number }}</td>
+            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ formatLastActive(u.last_active_in_utc) }}</td>
+          </tr>
+          <tr *ngIf="!isLoadingUsers && users.length === 0 && !usersError">
+            <td colspan="5" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No users to display.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="totalPages > 1" class="flex items-center justify-between px-6 py-3 border-t border-gray-100 dark:border-gray-700">
+      <span class="text-xs text-gray-500 dark:text-gray-400">Page {{ currentPage }} of {{ totalPages }}</span>
+      <div class="flex items-center gap-2">
+        <button (click)="prevPage()" [disabled]="currentPage === 1"
+                class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+          Prev
+        </button>
+        <button (click)="nextPage()" [disabled]="currentPage === totalPages"
+                class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

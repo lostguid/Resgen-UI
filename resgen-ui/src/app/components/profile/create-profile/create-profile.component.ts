@@ -6,10 +6,11 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { Datepicker } from 'flowbite-datepicker';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-create-profile',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DragDropModule],
   templateUrl: './create-profile.component.html',
   styleUrls: ['./create-profile.component.css']
 })
@@ -50,22 +51,28 @@ export class CreateProfileComponent implements AfterViewInit {
   }
 
   initializeDatepickers() {
-    const datepickerElements = document.querySelectorAll('[datepickerr]');
-    datepickerElements.forEach((el) => {      
-      const datepicker = new Datepicker(el as HTMLElement, {
-        // Optional: Add any datepicker options here
+    const datepickerElements = document.querySelectorAll<HTMLInputElement>('[datepickerr]');
+    datepickerElements.forEach((el) => {
+      if (el.dataset['dpInit'] === '1') return;
+      el.dataset['dpInit'] = '1';
+
+      new Datepicker(el, {
+        autohide: true,
+        format: 'mm/dd/yyyy'
       });
+
       el.addEventListener('changeDate', (event: any) => {
         const input = event.target as HTMLInputElement;
-        const formControlName = input.getAttribute('id');        
-        if (formControlName) {
-          const splitString = formControlName.replace(/(\d+)$/, '.$1').replace(/(.*)\.(\d+)/, '$2.$1');
-          const control = this.form.get('experiences.'+splitString);
-          if (control) {
-            control.setValue(input.value);
-            control.markAsDirty();
-            control.updateValueAndValidity();
-          }
+        const id = input.getAttribute('id');
+        if (!id) return;
+        const match = /^(startDate|endDate)(\d+)$/.exec(id);
+        if (!match) return;
+        const control = this.form.get(`experiences.${match[2]}.${match[1]}`);
+        if (control) {
+          control.setValue(input.value);
+          control.markAsDirty();
+          control.markAsTouched();
+          control.updateValueAndValidity();
         }
       });
     });
@@ -121,6 +128,15 @@ export class CreateProfileComponent implements AfterViewInit {
 
   removeExperience(index: number) {
     this.experiences.removeAt(index);
+  }
+
+  dropExperience(event: CdkDragDrop<AbstractControl[]>) {
+    if (event.previousIndex === event.currentIndex) return;
+    const control = this.experiences.at(event.previousIndex);
+    this.experiences.removeAt(event.previousIndex);
+    this.experiences.insert(event.currentIndex, control);
+    this.experiences.markAsDirty();
+    this.experiences.updateValueAndValidity();
   }
 
   createCertificationFormGroup(): FormGroup {

@@ -11,6 +11,7 @@ import { AuthService } from '@auth0/auth0-angular';
 import { Flowbite } from '../flowbite-decorator';
 import { delay, of, switchMap } from 'rxjs';
 import { TabService } from './services/tab.service';
+import { RoleService } from './services/role.service';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +24,7 @@ export class AppComponent implements OnInit {
   title = 'resgen-ui';
   selectedTab: string = 'home';
   isAuthenticated: boolean = false;
+  isAdmin: boolean = false;
   isLoading: boolean = true; // Add isLoading property
 
   userImageUrl: string | null = localStorage.getItem('user.picture');
@@ -36,10 +38,14 @@ export class AppComponent implements OnInit {
     private http: HttpClient,
     private flowbiteService: FlowbiteService,
     private auth0: AuthService,
-    private tabService: TabService
+    private tabService: TabService,
+    private roleService: RoleService
   ) {
     this.tabService.selectedTab$.subscribe(tab => {
       this.selectedTab = tab;
+    });
+    this.roleService.isAdmin$.subscribe(isAdmin => {
+      this.isAdmin = isAdmin;
     });
   }
 
@@ -120,6 +126,12 @@ export class AppComponent implements OnInit {
   openAccountTab() {
     this.selectedTab = 'account';
     this.router.navigate(['/account']);
+    this.closeSidebar();
+  }
+
+  openAdminTab() {
+    this.selectedTab = 'admin';
+    this.router.navigate(['/admin']);
     this.closeSidebar();
   }
 

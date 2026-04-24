@@ -154,11 +154,15 @@
                         </button>
                     </div>
 
-                    <div formArrayName="experiences" class="space-y-4">
-                        <div *ngFor="let experience of experiences.controls; let i=index" [formGroupName]="i"
+                    <div formArrayName="experiences" cdkDropList (cdkDropListDropped)="dropExperience($event)" class="space-y-4">
+                        <div *ngFor="let experience of experiences.controls; let i=index" [formGroupName]="i" cdkDrag
                             class="relative border border-gray-200 rounded-xl bg-gray-50/50 p-4 sm:p-5 transition-colors hover:border-gray-300 dark:bg-gray-900/30 dark:border-gray-700 dark:hover:border-gray-600">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="inline-flex items-center gap-2 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    <button type="button" cdkDragHandle aria-label="Drag to reorder"
+                                        class="flex items-center justify-center h-6 w-6 rounded-md text-gray-400 hover:bg-gray-200 hover:text-gray-700 active:cursor-grabbing cursor-grab dark:hover:bg-gray-700 dark:hover:text-gray-200">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0 5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0 5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm6-10a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0 5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0 5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+                                    </button>
                                     <span class="flex h-5 w-5 items-center justify-center rounded-md bg-gray-800 text-white text-[10px] dark:bg-gray-200 dark:text-gray-900">{{ i + 1 }}</span>
                                     Experience {{ i + 1 }}
                                 </div>

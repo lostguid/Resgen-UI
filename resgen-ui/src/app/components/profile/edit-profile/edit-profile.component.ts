@@ -8,12 +8,13 @@ import { CommonModule } from '@angular/common';
 import { Flowbite } from '../../../../flowbite-decorator';
 import { first } from 'rxjs';
 import { ModalComponent } from '../../modal/modal.component';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-edit-profile',
   templateUrl: './edit-profile.component.html',
   styleUrls: ['./edit-profile.component.css'],
-  imports: [CommonModule, ReactiveFormsModule, ModalComponent]
+  imports: [CommonModule, ReactiveFormsModule, ModalComponent, DragDropModule]
 })
 
 @Flowbite()
@@ -130,22 +131,28 @@ export class EditProfileComponent implements OnInit {
   }
 
   initializeDatepickers() {
-    const datepickerElements = document.querySelectorAll('[datepicker]');
+    const datepickerElements = document.querySelectorAll<HTMLInputElement>('[datepickerr]');
     datepickerElements.forEach((el) => {
-      const datepicker = new Datepicker(el as HTMLElement, {
-        // Optional: Add any datepicker options here
+      if (el.dataset['dpInit'] === '1') return;
+      el.dataset['dpInit'] = '1';
+
+      new Datepicker(el, {
+        autohide: true,
+        format: 'mm/dd/yyyy'
       });
+
       el.addEventListener('changeDate', (event: any) => {
         const input = event.target as HTMLInputElement;
-        const formControlName = input.getAttribute('id');
-        if (formControlName) {
-          const splitString = formControlName.replace(/(\d+)$/, '.$1').replace(/(.*)\.(\d+)/, '$2.$1');
-          const control = this.editForm.get('experiences.'+splitString);          
-          if (control) {
-            control.setValue(input.value);
-            control.markAsDirty();
-            control.updateValueAndValidity();
-          }
+        const id = input.getAttribute('id');
+        if (!id) return;
+        const match = /^(startDate|endDate)(\d+)$/.exec(id);
+        if (!match) return;
+        const control = this.editForm.get(`experiences.${match[2]}.${match[1]}`);
+        if (control) {
+          control.setValue(input.value);
+          control.markAsDirty();
+          control.markAsTouched();
+          control.updateValueAndValidity();
         }
       });
     });
@@ -162,6 +169,15 @@ export class EditProfileComponent implements OnInit {
 
   removeExperience(index: number) {
     this.experiences.removeAt(index);
+  }
+
+  dropExperience(event: CdkDragDrop<AbstractControl[]>) {
+    if (event.previousIndex === event.currentIndex) return;
+    const control = this.experiences.at(event.previousIndex);
+    this.experiences.removeAt(event.previousIndex);
+    this.experiences.insert(event.currentIndex, control);
+    this.experiences.markAsDirty();
+    this.experiences.updateValueAndValidity();
   }
 
   createCertificationFormGroup(cert?: any): FormGroup {
