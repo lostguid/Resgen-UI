@@ -5,13 +5,14 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Profiles</h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    <ng-container *ngIf="!isLoading">
-                        <span *ngIf="profiles.length === 0">Create a profile to start generating resumes.</span>
-                        <span *ngIf="profiles.length > 0">
-                            {{ profiles.length }} {{ profiles.length === 1 ? 'profile' : 'profiles' }} saved.
+                    <ng-container *ngIf="hasLoadedOnce">
+                        <span *ngIf="totalItems === 0 && !lastSubmittedTerm">Create a profile to start generating resumes.</span>
+                        <span *ngIf="totalItems > 0">
+                            {{ totalItems }} {{ totalItems === 1 ? 'profile' : 'profiles' }} saved.
                         </span>
+                        <span *ngIf="totalItems === 0 && lastSubmittedTerm">No profiles match your search.</span>
                     </ng-container>
-                    <ng-container *ngIf="isLoading">Loading your profiles…</ng-container>
+                    <ng-container *ngIf="!hasLoadedOnce">Loading your profiles…</ng-container>
                 </p>
             </div>
             <button (click)="addProfile()"
@@ -26,7 +27,7 @@
         <!-- Card -->
         <div class="bg-white dark:bg-gray-800 shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             <!-- Loading skeleton -->
-            <div *ngIf="isLoading" class="divide-y divide-gray-200 dark:divide-gray-700">
+            <div *ngIf="!hasLoadedOnce" class="divide-y divide-gray-200 dark:divide-gray-700">
                 <div *ngFor="let _ of [1,2,3]" class="flex items-center gap-4 px-6 py-4 animate-pulse">
                     <div class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700"></div>
                     <div class="flex-1 space-y-2">
@@ -38,7 +39,7 @@
             </div>
 
             <!-- Empty state -->
-            <div *ngIf="!isLoading && profiles.length === 0" class="px-6 py-16 text-center">
+            <div *ngIf="hasLoadedOnce && totalItems === 0 && !lastSubmittedTerm" class="px-6 py-16 text-center">
                 <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30">
                     <svg class="h-7 w-7 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75" />
@@ -57,8 +58,41 @@
                 </button>
             </div>
 
+            <!-- Search -->
+            <div *ngIf="hasLoadedOnce && (totalItems > 0 || lastSubmittedTerm)"
+                class="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+              <div class="relative max-w-sm">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15z" />
+                  </svg>
+                </div>
+                <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()"
+                  placeholder="Search profiles"
+                  class="block w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-9 pr-9 py-2 transition-shadow dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" />
+                <button *ngIf="searchTerm || lastSubmittedTerm" type="button" (click)="clearSearch()" title="Clear search"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- No matches -->
+            <div *ngIf="hasLoadedOnce && totalItems === 0 && lastSubmittedTerm"
+                class="px-6 py-12 text-center">
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                No profiles match <span class="font-medium text-gray-700 dark:text-gray-200">“{{ lastSubmittedTerm }}”</span>.
+              </p>
+              <button type="button" (click)="clearSearch()"
+                class="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400">
+                Clear search
+              </button>
+            </div>
+
             <!-- Table -->
-            <div *ngIf="!isLoading && profiles.length > 0">
+            <div *ngIf="hasLoadedOnce && profiles.length > 0">
               <div class="overflow-x-auto">
                 <table class="min-w-full">
                     <thead class="bg-gray-50 dark:bg-gray-900/50">
@@ -69,7 +103,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        <tr *ngFor="let profile of pagedProfiles"
+                        <tr *ngFor="let profile of profiles"
                             class="group hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center gap-3">
@@ -118,7 +152,7 @@
               <!-- Pagination -->
               <div *ngIf="totalPages > 1" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40">
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                  Showing <span class="font-medium text-gray-700 dark:text-gray-200">{{ pageStartIndex }}</span>–<span class="font-medium text-gray-700 dark:text-gray-200">{{ pageEndIndex }}</span> of <span class="font-medium text-gray-700 dark:text-gray-200">{{ profiles.length }}</span>
+                  Showing <span class="font-medium text-gray-700 dark:text-gray-200">{{ pageStartIndex }}</span>–<span class="font-medium text-gray-700 dark:text-gray-200">{{ pageEndIndex }}</span> of <span class="font-medium text-gray-700 dark:text-gray-200">{{ totalItems }}</span>
                 </p>
                 <div class="inline-flex items-center gap-1">
                   <button type="button" (click)="prevPage()" [disabled]="currentPage === 1"

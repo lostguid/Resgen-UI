@@ -4,13 +4,14 @@
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Resumes</h1>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                <ng-container *ngIf="!isLoading">
-                    <span *ngIf="resumes.length === 0">Generated resumes will appear here.</span>
-                    <span *ngIf="resumes.length > 0">
-                        {{ resumes.length }} {{ resumes.length === 1 ? 'resume' : 'resumes' }} saved. Select one to preview.
+                <ng-container *ngIf="hasLoadedOnce">
+                    <span *ngIf="totalItems === 0 && !lastSubmittedTerm">Generated resumes will appear here.</span>
+                    <span *ngIf="totalItems > 0">
+                        {{ totalItems }} {{ totalItems === 1 ? 'resume' : 'resumes' }} saved. Select one to preview.
                     </span>
+                    <span *ngIf="totalItems === 0 && lastSubmittedTerm">No resumes match your search.</span>
                 </ng-container>
-                <ng-container *ngIf="isLoading">Loading your resumes…</ng-container>
+                <ng-container *ngIf="!hasLoadedOnce">Loading your resumes…</ng-container>
             </p>
         </div>
 
@@ -19,7 +20,7 @@
             <div class="lg:col-span-2">
                 <div class="bg-white dark:bg-gray-800 shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <!-- Loading skeleton -->
-                    <div *ngIf="isLoading" class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <div *ngIf="!hasLoadedOnce" class="divide-y divide-gray-200 dark:divide-gray-700">
                         <div *ngFor="let _ of [1,2,3,4]" class="flex items-center gap-3 px-5 py-4 animate-pulse">
                             <div class="h-9 w-9 rounded-lg bg-gray-200 dark:bg-gray-700"></div>
                             <div class="flex-1 space-y-2">
@@ -30,7 +31,7 @@
                     </div>
 
                     <!-- Empty state -->
-                    <div *ngIf="!isLoading && resumes.length === 0" class="px-6 py-14 text-center">
+                    <div *ngIf="hasLoadedOnce && totalItems === 0 && !lastSubmittedTerm" class="px-6 py-14 text-center">
                         <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30">
                             <svg class="h-7 w-7 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0A2.25 2.25 0 0 0 11.25 4.5H13.5m-2.25 0a2.25 2.25 0 0 0-2.25 2.25M8.25 6.75H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
@@ -42,8 +43,41 @@
                         </p>
                     </div>
 
+                    <!-- Search -->
+                    <div *ngIf="hasLoadedOnce && (totalItems > 0 || lastSubmittedTerm)"
+                        class="px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15z" />
+                                </svg>
+                            </div>
+                            <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()"
+                                placeholder="Search resumes"
+                                class="block w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-9 pr-9 py-2 transition-shadow dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" />
+                            <button *ngIf="searchTerm || lastSubmittedTerm" type="button" (click)="clearSearch()" title="Clear search"
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- No matches -->
+                    <div *ngIf="hasLoadedOnce && totalItems === 0 && lastSubmittedTerm"
+                        class="px-6 py-10 text-center">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            No resumes match <span class="font-medium text-gray-700 dark:text-gray-200">“{{ lastSubmittedTerm }}”</span>.
+                        </p>
+                        <button type="button" (click)="clearSearch()"
+                            class="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400">
+                            Clear search
+                        </button>
+                    </div>
+
                     <!-- Column headers -->
-                    <div *ngIf="!isLoading && resumes.length > 0"
+                    <div *ngIf="hasLoadedOnce && resumes.length > 0"
                         class="hidden sm:flex items-center gap-3 px-5 py-2.5 bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200 dark:border-gray-700 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                         <div class="flex-shrink-0 w-10"></div>
                         <div class="min-w-0 flex-1">Name</div>
@@ -52,8 +86,8 @@
                     </div>
 
                     <!-- List -->
-                    <ul *ngIf="!isLoading && resumes.length > 0" class="divide-y divide-gray-200 dark:divide-gray-700">
-                        <li *ngFor="let resume of pagedResumes"
+                    <ul *ngIf="hasLoadedOnce && resumes.length > 0" class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <li *ngFor="let resume of resumes"
                             [class.bg-blue-50]="resume.id === selectedResumeId"
                             [class.dark:bg-blue-900]="resume.id === selectedResumeId"
                             class="group flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors cursor-pointer"
@@ -101,7 +135,7 @@
                     </ul>
 
                     <!-- Pagination -->
-                    <div *ngIf="!isLoading && totalPages > 1" class="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40">
+                    <div *ngIf="hasLoadedOnce && totalPages > 1" class="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40">
                       <button type="button" (click)="prevPage()" [disabled]="currentPage === 1"
                         class="inline-flex items-center gap-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-md px-2 py-1.5 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -110,7 +144,7 @@
                         Prev
                       </button>
                       <span class="text-xs font-medium text-gray-600 dark:text-gray-300">
-                        {{ pageStartIndex }}–{{ pageEndIndex }} of {{ resumes.length }}
+                        {{ pageStartIndex }}–{{ pageEndIndex }} of {{ totalItems }}
                       </span>
                       <button type="button" (click)="nextPage()" [disabled]="currentPage === totalPages"
                         class="inline-flex items-center gap-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-md px-2 py-1.5 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700">

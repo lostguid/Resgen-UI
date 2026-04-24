@@ -1,13 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
+import { Subject, of } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Flowbite } from '../../../flowbite-decorator';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 
 @Component({
   selector: 'app-resume',
-  imports: [CommonModule, PdfViewerModule],
+  imports: [CommonModule, FormsModule, PdfViewerModule],
   templateUrl: './resume.component.html',
   styleUrls: ['./resume.component.css']
 })
@@ -24,52 +28,89 @@ export class ResumeComponent implements OnInit {
 
   pageSize = 8;
   currentPage = 1;
+  totalItems = 0;
+  searchTerm = '';
+  lastSubmittedTerm = '';
+  hasLoadedOnce = false;
+
+  private searchSubject = new Subject<string>();
+  private destroyRef = inject(DestroyRef);
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.loadResumes();
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(term => {
+        this.currentPage = 1;
+        return this.fetchPaged(term, 1);
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(res => this.applyResults(res));
+
+    this.loadPage(1);
   }
 
-  loadResumes(): void {
+  loadPage(page: number): void {
+    this.currentPage = page;
+    this.fetchPaged(this.searchTerm.trim(), page)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(res => this.applyResults(res));
+  }
+
+  refresh(): void {
+    this.loadPage(this.currentPage);
+  }
+
+  private fetchPaged(term: string, page: number) {
     this.isLoading = true;
-    this.http.get<any[]>(`${environment.apiUrl}/Resume/user/`+localStorage.getItem('user.id')).subscribe({
-      next: data => {
-        this.resumes = (data || []).slice().sort((a, b) =>
-          new Date(b.created_at_utc).getTime() - new Date(a.created_at_utc).getTime()
-        );
-        this.currentPage = 1;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.resumes = [];
-        this.currentPage = 1;
-        this.isLoading = false;
-      }
+    const userId = localStorage.getItem('user.id');
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(this.pageSize)
     });
+    if (term) params.set('q', term);
+    const url = `${environment.apiUrl}/Resume/user/${userId}?${params}`;
+    return this.http.get<{ items: any[]; total: number }>(url)
+      .pipe(catchError(() => of({ items: [], total: 0 })));
+  }
+
+  private applyResults(res: { items: any[]; total: number }): void {
+    this.resumes = res.items || [];
+    this.totalItems = res.total || 0;
+    this.isLoading = false;
+    this.lastSubmittedTerm = this.searchTerm.trim();
+    this.hasLoadedOnce = true;
   }
 
   get totalPages(): number {
-    return Math.max(1, Math.ceil(this.resumes.length / this.pageSize));
-  }
-
-  get pagedResumes(): any[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.resumes.slice(start, start + this.pageSize);
+    return Math.max(1, Math.ceil(this.totalItems / this.pageSize));
   }
 
   get pageStartIndex(): number {
-    if (this.resumes.length === 0) return 0;
+    if (this.totalItems === 0) return 0;
     return (this.currentPage - 1) * this.pageSize + 1;
   }
 
   get pageEndIndex(): number {
-    return Math.min(this.currentPage * this.pageSize, this.resumes.length);
+    return Math.min(this.currentPage * this.pageSize, this.totalItems);
+  }
+
+  onSearchChange(): void {
+    this.searchSubject.next(this.searchTerm.trim());
+  }
+
+  clearSearch(): void {
+    if (!this.searchTerm && !this.lastSubmittedTerm) return;
+    this.searchTerm = '';
+    this.loadPage(1);
   }
 
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
+    if (page === this.currentPage) return;
+    this.loadPage(page);
   }
 
   nextPage(): void {
@@ -113,11 +154,15 @@ export class ResumeComponent implements OnInit {
     this.isDeleting = true;
     this.http.delete(`${environment.apiUrl}/Resume/${id}`).subscribe({
       next: () => {
-        this.resumes = this.resumes.filter(resume => resume.id !== id);
-        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
         if (this.selectedResumeId === id) {
           this.selectedResumeUrl = null;
           this.selectedResumeId = null;
+        }
+        const wasLastOnPage = this.resumes.length === 1 && this.currentPage > 1;
+        if (wasLastOnPage) {
+          this.loadPage(this.currentPage - 1);
+        } else {
+          this.refresh();
         }
         this.isDeleting = false;
         this.showDeleteModal = false;

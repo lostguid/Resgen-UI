@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Subject, of } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { ModalComponent } from '../modal/modal.component';
@@ -35,6 +38,13 @@ export class ProfileComponent implements OnInit {
 
   pageSize = 10;
   currentPage = 1;
+  totalItems = 0;
+  searchTerm = '';
+  lastSubmittedTerm = '';
+  hasLoadedOnce = false;
+
+  private searchSubject = new Subject<string>();
+  private destroyRef = inject(DestroyRef);
 
   constructor(private fb: FormBuilder, public router: Router, private http: HttpClient) {
     this.editForm = this.fb.group({
@@ -43,46 +53,78 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loadProfiles();
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(term => {
+        this.currentPage = 1;
+        return this.fetchPaged(term, 1);
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(res => this.applyResults(res));
+
+    this.loadPage(1);
   }
 
-  loadProfiles() {
+  loadPage(page: number) {
+    this.currentPage = page;
+    this.fetchPaged(this.searchTerm.trim(), page)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(res => this.applyResults(res));
+  }
+
+  refresh() {
+    this.loadPage(this.currentPage);
+  }
+
+  private fetchPaged(term: string, page: number) {
     this.isLoading = true;
-    this.http.get<any[]>(`${environment.apiUrl}/profile/user/` + localStorage.getItem('user.id')).subscribe({
-      next: data => {
-        this.profiles = data || [];
-        this.currentPage = 1;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.profiles = [];
-        this.currentPage = 1;
-        this.isLoading = false;
-      }
+    const userId = localStorage.getItem('user.id');
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(this.pageSize)
     });
+    if (term) params.set('q', term);
+    const url = `${environment.apiUrl}/profile/user/${userId}?${params}`;
+    return this.http.get<{ items: any[]; total: number }>(url)
+      .pipe(catchError(() => of({ items: [], total: 0 })));
+  }
+
+  private applyResults(res: { items: any[]; total: number }) {
+    this.profiles = res.items || [];
+    this.totalItems = res.total || 0;
+    this.isLoading = false;
+    this.lastSubmittedTerm = this.searchTerm.trim();
+    this.hasLoadedOnce = true;
+  }
+
+  onSearchChange() {
+    this.searchSubject.next(this.searchTerm.trim());
   }
 
   get totalPages(): number {
-    return Math.max(1, Math.ceil(this.profiles.length / this.pageSize));
-  }
-
-  get pagedProfiles(): any[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.profiles.slice(start, start + this.pageSize);
+    return Math.max(1, Math.ceil(this.totalItems / this.pageSize));
   }
 
   get pageStartIndex(): number {
-    if (this.profiles.length === 0) return 0;
+    if (this.totalItems === 0) return 0;
     return (this.currentPage - 1) * this.pageSize + 1;
   }
 
   get pageEndIndex(): number {
-    return Math.min(this.currentPage * this.pageSize, this.profiles.length);
+    return Math.min(this.currentPage * this.pageSize, this.totalItems);
+  }
+
+  clearSearch() {
+    if (!this.searchTerm && !this.lastSubmittedTerm) return;
+    this.searchTerm = '';
+    this.loadPage(1);
   }
 
   goToPage(page: number) {
     if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
+    if (page === this.currentPage) return;
+    this.loadPage(page);
   }
 
   nextPage() {
@@ -123,8 +165,12 @@ export class ProfileComponent implements OnInit {
     this.isDeleting = true;
     this.http.delete(`${environment.apiUrl}/profile/${id}`).subscribe(
       () => {
-        this.profiles = this.profiles.filter((profile: any) => profile.id !== id);
-        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
+        const wasLastOnPage = this.profiles.length === 1 && this.currentPage > 1;
+        if (wasLastOnPage) {
+          this.loadPage(this.currentPage - 1);
+        } else {
+          this.refresh();
+        }
         this.isDeleting = false;
         this.showDeleteModal = false;
         this.profileToDelete = null;
@@ -185,7 +231,7 @@ export class ProfileComponent implements OnInit {
             this.showCloneModal = false;
             this.cloneSourceProfile = null;
             this.cloneNewName = '';
-            this.loadProfiles();
+            this.refresh();
             this.showModal = true;
             this.modalTitle = 'Success';
             this.modalMessage = 'Profile cloned successfully';

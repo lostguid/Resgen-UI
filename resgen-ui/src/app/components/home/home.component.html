@@ -14,18 +14,62 @@
                             <label for="profileDropdown" class="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">
                                 Profile <span class="text-red-500">*</span>
                             </label>
-                            <select id="profileDropdown"
+
+                            <!-- Simple select (≤5 profiles) -->
+                            <select *ngIf="!hasManyProfiles" id="profileDropdown"
                                 [(ngModel)]="selectedProfileId" (change)="onProfileChange()"
                                 [disabled]="profilesLoading"
                                 class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 transition-shadow disabled:opacity-60 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 <option value="" disabled>
                                     <ng-container *ngIf="profilesLoading">Loading profiles…</ng-container>
-                                    <ng-container *ngIf="!profilesLoading && profiles.length === 0">No profiles — create one first</ng-container>
-                                    <ng-container *ngIf="!profilesLoading && profiles.length > 0">Select a profile</ng-container>
+                                    <ng-container *ngIf="!profilesLoading && profilesTotal === 0">No profiles — create one first</ng-container>
+                                    <ng-container *ngIf="!profilesLoading && profilesTotal > 0">Select a profile</ng-container>
                                 </option>
                                 <option *ngFor="let profile of profiles" [value]="profile.id">{{ profile.profile_name }}</option>
                             </select>
-                            <p *ngIf="!profilesLoading && profiles.length === 0" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+
+                            <!-- Combobox (>5 profiles) -->
+                            <div *ngIf="hasManyProfiles" class="relative">
+                                <div class="relative">
+                                    <input type="text" id="profileDropdown"
+                                        [(ngModel)]="profileSearchTerm"
+                                        (ngModelChange)="onProfileSearchChange()"
+                                        (focus)="openProfileDropdown()"
+                                        (blur)="closeProfileDropdown()"
+                                        placeholder="Type to search profiles…"
+                                        autocomplete="off"
+                                        class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pr-9 transition-shadow dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" />
+                                    <button *ngIf="selectedProfileId || profileSearchTerm" type="button" (mousedown)="$event.preventDefault()" (click)="clearSelectedProfile()"
+                                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                        title="Clear">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div *ngIf="profileDropdownOpen"
+                                    class="absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                    <div *ngIf="profileResultsLoading" class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                                        Searching…
+                                    </div>
+                                    <ul *ngIf="!profileResultsLoading">
+                                        <li *ngFor="let profile of profileResults"
+                                            (mousedown)="selectProfile(profile)"
+                                            [class.bg-blue-50]="profile.id === selectedProfileId"
+                                            [class.dark:bg-blue-900]="profile.id === selectedProfileId"
+                                            class="px-3 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
+                                            {{ profile.profile_name }}
+                                            <span *ngIf="profile.name" class="block text-xs text-gray-500 dark:text-gray-400">{{ profile.name }}</span>
+                                        </li>
+                                        <li *ngIf="profileResults.length === 0" class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                                            No profiles match <span class="font-medium text-gray-700 dark:text-gray-200">“{{ profileSearchTerm }}”</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <p *ngIf="!profilesLoading && profilesTotal === 0" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
                                 Head to <a routerLink="/profiles" class="text-blue-600 hover:underline">Profiles</a> to create one.
                             </p>
                         </div>
