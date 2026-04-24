@@ -9,6 +9,7 @@ import { EditProfileComponent } from './components/profile/edit-profile/edit-pro
 import { WelcomeComponent } from './components/welcome/welcome.component';
 import { AdminComponent } from './components/admin/admin.component';
 import { AdminUserDetailComponent } from './components/admin/admin-user-detail/admin-user-detail.component';
+import { AdminTemplatesComponent } from './components/admin/admin-templates/admin-templates.component';
 import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
@@ -21,5 +22,6 @@ export const routes: Routes = [
     { path: 'profiles/edit/:id', component: EditProfileComponent, canActivate: [AuthGuard]  },
     { path: 'admin', component: AdminComponent, canActivate: [AuthGuard, adminGuard] },
     { path: 'admin/users/:id', component: AdminUserDetailComponent, canActivate: [AuthGuard, adminGuard] },
+    { path: 'admin/templates', component: AdminTemplatesComponent, canActivate: [AuthGuard, adminGuard] },
     { path: '', redirectTo: '/welcome', pathMatch: 'full' }
 ];

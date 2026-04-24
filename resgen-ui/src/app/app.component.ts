@@ -140,6 +140,12 @@ export class AppComponent implements OnInit {
     this.closeSidebar();
   }
 
+  openTemplatesTab() {
+    this.selectedTab = 'templates';
+    this.router.navigate(['/admin/templates']);
+    this.closeSidebar();
+  }
+
   closeSidebar() {
     const toggleButton = document.getElementById('side-bar-button');
     if (toggleButton && !this.isSidebarHidden()) {
