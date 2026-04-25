@@ -23,6 +23,13 @@ export class CreateProfileComponent implements AfterViewInit {
   modalClass = '';
   modalIcon = '';
 
+  // ---- Import from resume (self-contained, does not touch the existing form/onSubmit logic) ----
+  importFile: File | null = null;
+  importBusy = false;
+  importError: string | null = null;
+  importCompleted = false;
+  importOpen = false;
+
   constructor(private fb: FormBuilder, private router: Router, private http: HttpClient) {
     this.form = this.fb.group({
       profileName: ['', Validators.required],
@@ -289,5 +296,145 @@ export class CreateProfileComponent implements AfterViewInit {
 
   goBack(): void {
     this.router.navigate(['/profiles']);
+  }
+
+  // ---- Import from resume (self-contained) -----------------------------------
+
+  onImportFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.importError = null;
+    this.importCompleted = false;
+    if (!input.files || input.files.length === 0) {
+      this.importFile = null;
+      return;
+    }
+    const file = input.files[0];
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      this.importFile = null;
+      this.importError = 'Only PDF files are supported.';
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      this.importFile = null;
+      this.importError = 'File is too large (max 10 MB).';
+      return;
+    }
+    this.importFile = file;
+  }
+
+  importFromFile(): void {
+    if (!this.importFile || this.importBusy) return;
+
+    const userId = localStorage.getItem('user.id') || '';
+    if (!userId) {
+      this.importError = 'Could not resolve user id — please sign in again.';
+      return;
+    }
+
+    this.importBusy = true;
+    this.importError = null;
+    this.importCompleted = false;
+
+    const formData = new FormData();
+    formData.append('file', this.importFile);
+    const url = `${environment.apiUrl}/profile/import?userId=${encodeURIComponent(userId)}`;
+
+    this.http.post<any>(url, formData).subscribe({
+      next: parsed => {
+        try {
+          this.applyImportedProfile(parsed || {});
+          this.importCompleted = true;
+        } catch (e) {
+          this.importError = 'Import succeeded but populating the form failed. Please fill the fields manually.';
+        }
+        this.importBusy = false;
+      },
+      error: err => {
+        this.importBusy = false;
+        const msg = typeof err?.error === 'string' && err.error
+          ? err.error
+          : 'Import failed. Please try again or fill the fields manually.';
+        this.importError = msg;
+      }
+    });
+  }
+
+  clearImport(fileInput?: HTMLInputElement): void {
+    if (this.importBusy) return;
+    this.importFile = null;
+    this.importError = null;
+    this.importCompleted = false;
+    if (fileInput) fileInput.value = '';
+  }
+
+  private applyImportedProfile(p: any): void {
+    // Top-level fields — only patch values that the server returned non-empty,
+    // so we don't clobber user-entered values unnecessarily.
+    const patch: any = {};
+    if (p.first_name) patch.firstName = p.first_name;
+    if (p.last_name) patch.lastName = p.last_name;
+    if (p.email) patch.email = p.email;
+    if (p.phone) patch.phone = this.normalizePhone(p.phone);
+    if (p.linkedin_url) patch.linkedin = p.linkedin_url;
+    if (p.school_name) patch.school = p.school_name;
+    if (p.level_of_education) patch.loe = p.level_of_education;
+    this.form.patchValue(patch);
+
+    // Experiences — rebuild the FormArray so existing placeholder rows are replaced.
+    const experiences = Array.isArray(p.experiences) ? p.experiences : [];
+    this.experiences.clear();
+    if (experiences.length === 0) {
+      this.experiences.push(this.createExperienceFormGroup());
+    } else {
+      for (const exp of experiences) {
+        const group = this.createExperienceFormGroup();
+        const skillsArray = Array.isArray(exp?.skills_used) ? exp.skills_used : [];
+        group.patchValue({
+          companyName: exp?.company_name || '',
+          title: exp?.title || '',
+          startDate: exp?.start_date_in_utc || '',
+          endDate: exp?.end_date_in_utc || '',
+          skillsUsed: skillsArray.join(', ')
+        });
+        this.experiences.push(group);
+      }
+    }
+
+    // Certifications
+    const certs = Array.isArray(p.certifications) ? p.certifications : [];
+    this.certifications.clear();
+    for (const c of certs) {
+      if (!c?.name) continue;
+      const group = this.createCertificationFormGroup();
+      group.patchValue({
+        name: c.name || '',
+        issuingOrg: c.issuing_org || '',
+        dateAcquired: c.date_acquired || ''
+      });
+      this.certifications.push(group);
+    }
+
+    // Leadership
+    const leadership = Array.isArray(p.leadership) ? p.leadership : [];
+    this.leadership.clear();
+    for (const l of leadership) {
+      if (!l?.role) continue;
+      const group = this.createLeadershipFormGroup();
+      group.patchValue({
+        role: l.role || '',
+        organization: l.organization || '',
+        dateRange: l.date_range || ''
+      });
+      this.leadership.push(group);
+    }
+
+    // Re-initialize the datepickers so the newly-added experience rows pick them up.
+    setTimeout(() => this.initializeDatepickers(), 0);
+  }
+
+  private normalizePhone(raw: string): string {
+    const digits = (raw || '').replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith('1')) return digits.substring(1);
+    return digits;
   }
 }

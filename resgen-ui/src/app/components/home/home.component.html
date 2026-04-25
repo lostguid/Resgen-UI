@@ -94,11 +94,11 @@
                             </p>
                         </div>
 
-                        <!-- Model select (hidden for now; selectedModelId still auto-populates from /api/Models default) -->
-                        <!--
-                        <div *ngIf="models.length > 0">
-                            <label for="modelDropdown" class="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white">
+                        <!-- Model select — admin-only. Non-admins use the server's default model. -->
+                        <div *ngIf="isAdmin && models.length > 0">
+                            <label for="modelDropdown" class="block mb-1.5 text-sm font-medium text-gray-900 dark:text-white inline-flex items-center gap-1.5">
                                 Model
+                                <span class="text-[10px] font-semibold uppercase tracking-wide text-amber-700 bg-amber-100 border border-amber-200 rounded px-1.5 py-0.5 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-800">Admin</span>
                             </label>
                             <select id="modelDropdown"
                                 [(ngModel)]="selectedModelId" (change)="onModelChange()"
@@ -106,7 +106,6 @@
                                 <option *ngFor="let m of models" [value]="m.id">{{ m.display_name }}</option>
                             </select>
                         </div>
-                        -->
 
 
                         <!-- Advanced -->
@@ -190,24 +189,35 @@
                 <div *ngIf="isGenerated" class="bg-white dark:bg-gray-800 shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                         <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Ready</h2>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Save it to your library or download the PDF.</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Save it to your library or download as PDF / DOCX.</p>
                     </div>
                     <div class="px-6 py-5 space-y-3">
-                        <div *ngIf="!showSaveTextbox" class="flex gap-2">
-                            <button (click)="toggleSaveTextbox()"
-                                class="flex-1 inline-flex justify-center items-center gap-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg px-4 py-2.5 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5zm4 0v4h6V5" />
-                                </svg>
-                                Save
-                            </button>
-                            <button (click)="downloadResume()"
-                                class="flex-1 inline-flex justify-center items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg px-4 py-2.5 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700">
+                        <div *ngIf="!showSaveTextbox" class="space-y-2">
+                            <div class="flex gap-2">
+                                <button (click)="toggleSaveTextbox()"
+                                    class="flex-1 inline-flex justify-center items-center gap-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg px-4 py-2.5 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5zm4 0v4h6V5" />
+                                    </svg>
+                                    Save
+                                </button>
+                                <button (click)="downloadResume()"
+                                    class="flex-1 inline-flex justify-center items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg px-4 py-2.5 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                                    </svg>
+                                    Download PDF
+                                </button>
+                            </div>
+                            <button (click)="downloadAsDocx()"
+                                class="w-full inline-flex justify-center items-center gap-2 text-sm font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-lg px-4 py-2.5 transition-colors dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800 dark:hover:bg-indigo-900/30">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
                                 </svg>
-                                Download
+                                Download DOCX
+                                <span class="ml-1 inline-flex items-center rounded-full bg-indigo-600 px-1.5 py-0.5 text-[10px] font-semibold text-white uppercase tracking-wide">Premium</span>
                             </button>
+                            <p *ngIf="docxError" class="text-xs text-red-600 dark:text-red-400">{{ docxError }}</p>
                         </div>
                         <div *ngIf="showSaveTextbox" class="space-y-3">
                             <div>

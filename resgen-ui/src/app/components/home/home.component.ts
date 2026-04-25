@@ -10,6 +10,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Subject, of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { TabService } from '../../services/tab.service';
+import { RoleService } from '../../services/role.service';
 
 @Component({
   selector: 'app-home',
@@ -50,6 +51,8 @@ export class HomeComponent {
 
   showSaveTextbox = false;
   fileName = '';
+  docxError = '';
+  private docxBlobUrl: string | null = null;
 
   advancedOpen = false;
   jobDescription = '';
@@ -58,7 +61,12 @@ export class HomeComponent {
   showMismatchModal = false;
   mismatchReason = '';
 
-  constructor(private http: HttpClient, private router: Router, private tabService: TabService) {}
+  isAdmin = false;
+
+  constructor(private http: HttpClient, private router: Router, private tabService: TabService, private roleService: RoleService) {
+    this.roleService.isAdmin$.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(v => this.isAdmin = v);
+  }
 
   ngOnInit(): void {
     this.loadProfiles();
@@ -199,16 +207,19 @@ export class HomeComponent {
     }
     this.isGenerated = false;
     this.showSaveTextbox = false;
+    this.clearDocxCache();
   }
 
   onModelChange(): void {
     this.isGenerated = false;
     this.showSaveTextbox = false;
+    this.clearDocxCache();
   }
 
   onProfileChange(): void {
     this.isGenerated = false;
     this.showSaveTextbox = false;
+    this.clearDocxCache();
     if (this.selectedProfileId) {
       const found = this.profiles.find(p => p.id === this.selectedProfileId)
                   || this.profileResults.find(p => p.id === this.selectedProfileId);
@@ -242,6 +253,8 @@ export class HomeComponent {
     this.showSaveTextbox = false;
     this.fileName = '';
     this.errorMessage = '';
+    this.docxError = '';
+    this.clearDocxCache();
 
     if (this.isAdvancedActive) {
       this.generateTailored();
@@ -252,12 +265,11 @@ export class HomeComponent {
 
   private generateStandard(): void {
     const modelParam = this.selectedModelId ? `&model=${encodeURIComponent(this.selectedModelId)}` : '';
-    this.http.get(`${environment.apiUrl}/Resume/generate-resume?profileId=${this.selectedProfileId}&templateId=${this.selectedTemplateId}&userId=${localStorage.getItem('user.id')}${modelParam}`, { responseType: 'blob' })
+    const url = `${environment.apiUrl}/Resume/generate-resume?profileId=${this.selectedProfileId}&templateId=${this.selectedTemplateId}&userId=${localStorage.getItem('user.id')}&format=both${modelParam}`;
+    this.http.get<{ pdfBase64: string; docxBase64: string }>(url)
       .subscribe({
         next: response => {
-          this.isLoading = false;
-          this.isGenerated = true;
-          this.selectedResumeUrl = window.URL.createObjectURL(response);
+          this.applyGenerateResponse(response);
         },
         error: () => {
           this.isLoading = false;
@@ -273,32 +285,54 @@ export class HomeComponent {
       templateId: this.selectedTemplateId,
       jobDescription: this.jobDescription.trim(),
       tailorStrength: this.tailorStrength,
-      model: this.selectedModelId
+      model: this.selectedModelId,
+      format: 'both'
     };
 
-    this.http.post(`${environment.apiUrl}/Resume/generate-tailored`, body, { responseType: 'blob' })
+    this.http.post<{ pdfBase64: string; docxBase64: string }>(`${environment.apiUrl}/Resume/generate-tailored`, body)
       .subscribe({
         next: response => {
-          this.isLoading = false;
-          this.isGenerated = true;
-          this.selectedResumeUrl = window.URL.createObjectURL(response);
+          this.applyGenerateResponse(response);
         },
-        error: async err => {
+        error: err => {
           this.isLoading = false;
-          if (err.status === 422 && err.error instanceof Blob) {
-            try {
-              const text = await err.error.text();
-              const parsed = JSON.parse(text);
-              this.mismatchReason = parsed?.reason || '';
-              this.showMismatchModal = true;
-              return;
-            } catch {
-              // fall through to generic error
-            }
+          if (err.status === 422) {
+            this.mismatchReason = err.error?.reason || '';
+            this.showMismatchModal = true;
+            return;
           }
           this.errorMessage = 'Could not generate the tailored resume. Please try again.';
         }
       });
+  }
+
+  private applyGenerateResponse(response: { pdfBase64: string; docxBase64: string }): void {
+    const pdfBlob = this.base64ToBlob(response.pdfBase64, 'application/pdf');
+    const docxBlob = this.base64ToBlob(
+      response.docxBase64,
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    );
+    this.selectedResumeUrl = window.URL.createObjectURL(pdfBlob);
+    this.docxBlobUrl = window.URL.createObjectURL(docxBlob);
+    this.isLoading = false;
+    this.isGenerated = true;
+  }
+
+  private base64ToBlob(base64: string, contentType: string): Blob {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return new Blob([bytes], { type: contentType });
+  }
+
+  private clearDocxCache(): void {
+    if (this.docxBlobUrl) {
+      window.URL.revokeObjectURL(this.docxBlobUrl);
+      this.docxBlobUrl = null;
+    }
+    this.docxError = '';
   }
 
   saveResume(): void {
@@ -357,6 +391,19 @@ export class HomeComponent {
     link.href = this.selectedResumeUrl;
     link.download = (this.fileName.trim() || 'resume') + '.pdf';
     link.target = '_blank';
+    link.click();
+  }
+
+  // DOCX was built alongside the PDF during generation; this just downloads the cached blob.
+  downloadAsDocx(): void {
+    if (!this.docxBlobUrl) {
+      this.docxError = 'Generate a resume first, then download the DOCX.';
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = this.docxBlobUrl;
+    link.download = (this.fileName.trim() || 'resume') + '.docx';
     link.click();
   }
 }
